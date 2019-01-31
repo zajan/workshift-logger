@@ -23,8 +23,37 @@ public class MyDBHelper extends SQLiteOpenHelper{
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+    public void onCreate(SQLiteDatabase db) {
+        String sql;
+        sql = "CREATE TABLE " + ClientsContract.TABLE_NAME + " (" +
+                ClientsContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, " +
+                ClientsContract.Columns.NAME+ " TEXT NOT NULL, " +
+                ClientsContract.Columns.OFFICIAL_NAME+ " TEXT, " +
+                ClientsContract.Columns.ADDRESS + " TEXT, " +
+                ClientsContract.Columns.BASE_PAYMENT + " INTEGER NOT NULL, " +
+                ClientsContract.Columns.PAY_TYPE + " INTEGER NOT NULL);";
+        db.execSQL(sql);
 
+        sql = "CREATE TABLE " + FactorsContract.TABLE_NAME + " (" +
+                FactorsContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, " +
+                FactorsContract.Columns.CLIENT_ID+ " INTEGER NOT NULL, " +
+                FactorsContract.Columns.START_HOUR+ " INTEGER NOT NULL, " +
+                FactorsContract.Columns.VALUE+ " INTEGER NOT NULL);";
+        db.execSQL(sql);
+
+        sql = "CREATE TABLE " + ProjectsContract.TABLE_NAME + " (" +
+                ProjectsContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, " +
+                ProjectsContract.Columns.NAME + " TEXT NOT NULL, " +
+                ProjectsContract.Columns.CLIENT_ID+ " INTEGER NOT NULL);";
+        db.execSQL(sql);
+
+        sql = "CREATE TABLE " + ShiftsContract.TABLE_NAME + " (" +
+                ShiftsContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, " +
+                ShiftsContract.Columns.START_TIME+ " INTEGER NOT NULL, " +
+                ShiftsContract.Columns.END_TIME+ " INTEGER, " +
+                ShiftsContract.Columns.PAUSE + " INTEGER, " +
+                ShiftsContract.Columns.PROJECT_ID + " INTEGER);";
+        db.execSQL(sql);
     }
 
     @Override

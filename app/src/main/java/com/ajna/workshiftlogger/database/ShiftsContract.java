@@ -16,7 +16,6 @@ public class ShiftsContract {
         public static final String END_TIME = "EndTime";
         public static final String PAUSE = "Pause";
         public static final String PROJECT_ID = "ProjectId";
-        public static final String CLIENT_ID = "ClientId";
     }
 
     public static final Uri CONTENT_URI = Uri.withAppendedPath(CONTENT_AUTHORITY_URI, TABLE_NAME);

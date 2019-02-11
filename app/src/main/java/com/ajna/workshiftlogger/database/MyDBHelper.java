@@ -6,7 +6,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MyDBHelper extends SQLiteOpenHelper{
-    private static String DATABASE_NAME = "";
+    private static final String TAG = "MyDBHelper";
+    private static String DATABASE_NAME = "WorkshiftLogger.db";
     private static final int DATABASE_VERSION = 1;
     private static MyDBHelper instance = null;
 
@@ -24,6 +25,7 @@ public class MyDBHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d(TAG, "onCreate: starts");
         String sql;
         sql = "CREATE TABLE " + ClientsContract.TABLE_NAME + " (" +
                 ClientsContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, " +
@@ -32,6 +34,7 @@ public class MyDBHelper extends SQLiteOpenHelper{
                 ClientsContract.Columns.ADDRESS + " TEXT, " +
                 ClientsContract.Columns.BASE_PAYMENT + " INTEGER NOT NULL, " +
                 ClientsContract.Columns.PAY_TYPE + " INTEGER NOT NULL);";
+        Log.d(TAG, "onCreate: " + sql);
         db.execSQL(sql);
 
         sql = "CREATE TABLE " + FactorsContract.TABLE_NAME + " (" +
@@ -39,12 +42,14 @@ public class MyDBHelper extends SQLiteOpenHelper{
                 FactorsContract.Columns.CLIENT_ID+ " INTEGER NOT NULL, " +
                 FactorsContract.Columns.START_HOUR+ " INTEGER NOT NULL, " +
                 FactorsContract.Columns.VALUE+ " INTEGER NOT NULL);";
+        Log.d(TAG, "onCreate: " + sql);
         db.execSQL(sql);
 
         sql = "CREATE TABLE " + ProjectsContract.TABLE_NAME + " (" +
                 ProjectsContract.Columns._ID + " INTEGER PRIMARY KEY NOT NULL, " +
                 ProjectsContract.Columns.NAME + " TEXT NOT NULL, " +
                 ProjectsContract.Columns.CLIENT_ID+ " INTEGER NOT NULL);";
+        Log.d(TAG, "onCreate: " + sql);
         db.execSQL(sql);
 
         sql = "CREATE TABLE " + ShiftsContract.TABLE_NAME + " (" +
@@ -53,6 +58,7 @@ public class MyDBHelper extends SQLiteOpenHelper{
                 ShiftsContract.Columns.END_TIME+ " INTEGER, " +
                 ShiftsContract.Columns.PAUSE + " INTEGER, " +
                 ShiftsContract.Columns.PROJECT_ID + " INTEGER);";
+        Log.d(TAG, "onCreate: " + sql);
         db.execSQL(sql);
     }
 

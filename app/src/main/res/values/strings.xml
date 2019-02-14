@@ -16,4 +16,14 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="name">Name</string>
+    <string name="official_name_optional">Official name (optional)</string>
+    <string name="address_optional">Address (optional)</string>
+    <string name="payment_type">Payment type</string>
+    <string name="flat_rate">Flat rate</string>
+    <string name="per_hour">Per hour</string>
+    <string name="payment_flat_or_per_hour">Payment (Flat or Per Hour)</string>
+    <string name="eur">EUR</string>
+    <string name="overhour_payment_factors">Overhour payment factors</string>
+    <string name="save">Save</string>
 </resources>

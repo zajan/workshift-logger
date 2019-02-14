@@ -4,11 +4,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.ajna.workshiftlogger.R;
 
@@ -21,6 +26,7 @@ import com.ajna.workshiftlogger.R;
  * create an instance of this fragment.
  */
 public class NewClientFragment extends Fragment {
+    private static final String TAG = "NewClientFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -76,7 +82,6 @@ public class NewClientFragment extends Fragment {
 
         return view;
     }
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

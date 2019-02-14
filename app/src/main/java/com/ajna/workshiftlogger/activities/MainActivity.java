@@ -4,23 +4,30 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.fragments.ClientsListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-                    ClientsListFragment.OnFragmentInteractionListener,
-                    NewClientFragment.OnFragmentInteractionListener{
+        ClientsListFragment.OnFragmentInteractionListener,
+        NewClientFragment.OnFragmentInteractionListener {
     private static final String TAG = "MainActivity";
 
-    ActionBarDrawerToggle toggle;
+    private ActionBarDrawerToggle toggle;
+    private DrawerLayout drawer;
+    private ActionBar actionBar;
+    private boolean mToolBarNavigationListenerIsRegistered = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: starts");
@@ -28,13 +35,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
 
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-
         toggle.setDrawerIndicatorEnabled(true);
 
         toggle.syncState();
@@ -42,36 +48,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_main, new ClientsListFragment()).commit();
+        if (savedInstanceState != null) {
+            resolveUpButtonWithFragmentStack();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_main, new ClientsListFragment())
+                    .commit();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        Log.d(TAG, "onBackPressed: starts");
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+            Log.d(TAG, "onBackPressed: backstack amount = " + backStackAmount);
+
+            if(backStackAmount >= 1) {
+                getSupportFragmentManager().popBackStack();
+                if (backStackAmount == 1) {
+                    showUpButton(false);
+                }
+            }
+             else {
+                super.onBackPressed();
+            }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == android.R.id.home) {
+            onBackPressed();
         }
 
         return super.onOptionsItemSelected(item);
@@ -83,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        switch (id){
+        switch (id) {
             // TODO
             case R.id.nav_shifts:
                 break;
@@ -101,15 +120,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    private void resolveUpButtonWithFragmentStack() {
+        showUpButton(getSupportFragmentManager().getBackStackEntryCount() > 0);
+    }
+
+    private void showUpButton(boolean show) {
+        Log.d(TAG, "showUpButton: starts");
+        Log.d(TAG, "showUpButton: show = " + show);
+        if (show) {
+            toggle.setDrawerIndicatorEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            if (!mToolBarNavigationListenerIsRegistered) {
+                Log.d(TAG, "showUpButton: !mToolBarNavigationListenerIsRegistered");
+                toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onBackPressed();
+                    }
+                });
+                mToolBarNavigationListenerIsRegistered = true;
+            }
+        } else {
+            Log.d(TAG, "showUpButton: mToolBarNavigationListenerIsRegistered");
+
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            toggle.setDrawerIndicatorEnabled(true);
+            toggle.setToolbarNavigationClickListener(null);
+            mToolBarNavigationListenerIsRegistered = false;
+
+        }
+    }
+
     @Override
     public void onNewClientClicked() {
+        Log.d(TAG, "onNewClientClicked: starts");
         toggle.setDrawerIndicatorEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (!mToolBarNavigationListenerIsRegistered) {
+            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+
+            mToolBarNavigationListenerIsRegistered = true;
+        }
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_main, new NewClientFragment())
                 .addToBackStack(null)

@@ -1,24 +1,18 @@
 package com.ajna.workshiftlogger.model;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 
-public class Factor implements Serializable {
+public class Factor implements Serializable,Comparable<Factor> {
     public static final long serialVersionUID = 20190215L;
 
-    private long _id;
     private int hours;
     private int factorInPercent;
-    private long clientId;
 
-    public Factor(long _id, int hours, int factorInPercent, long clientId) {
-        this._id = _id;
+    public Factor(int hours, int factorInPercent) {
         this.hours = hours;
         this.factorInPercent = factorInPercent;
-        this.clientId = clientId;
-    }
-
-    public long getId() {
-        return _id;
     }
 
     public int getHours() {
@@ -29,10 +23,6 @@ public class Factor implements Serializable {
         return factorInPercent;
     }
 
-    public long getClientId() {
-        return clientId;
-    }
-
     public void setHours(int hours) {
         this.hours = hours;
     }
@@ -41,7 +31,8 @@ public class Factor implements Serializable {
         this.factorInPercent = factorInPercent;
     }
 
-    public void setClientId(long clientId) {
-        this.clientId = clientId;
+    @Override
+    public int compareTo(@NonNull Factor factor) {
+        return Integer.compare(this.getHours(), factor.getHours());
     }
 }

@@ -1,21 +1,26 @@
 package com.ajna.workshiftlogger.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.Toast;
+import android.widget.ImageView;
 
 import com.ajna.workshiftlogger.R;
+import com.ajna.workshiftlogger.adapters.FactorsRecyclerViewAdapter;
+import com.ajna.workshiftlogger.model.Factor;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,7 +30,7 @@ import com.ajna.workshiftlogger.R;
  * Use the {@link NewClientFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewClientFragment extends Fragment {
+public class NewClientFragment extends Fragment implements FactorsRecyclerViewAdapter.OnFactorClickListener {
     private static final String TAG = "NewClientFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,6 +42,10 @@ public class NewClientFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private List<Factor> factors;
+    private RecyclerView rvFactors;
+    private FactorsRecyclerViewAdapter factorsRVAdapter;
 
     public NewClientFragment() {
         // Required empty public constructor
@@ -75,10 +84,46 @@ public class NewClientFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_client, container, false);
-
         etBasePayment = view.findViewById(R.id.et_payment);
 
+        if(factors == null) {
+            factors = new ArrayList<>();
+        }
+        rvFactors = view.findViewById(R.id.rv_factors);
+        factorsRVAdapter = new FactorsRecyclerViewAdapter(factors, this);
+        rvFactors.setAdapter(factorsRVAdapter);
+        rvFactors.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        ImageView btnAddFactor = view.findViewById(R.id.btn_add_factor);
+        btnAddFactor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LayoutInflater dialogInflater = getActivity().getLayoutInflater();
+                final View dialogView = dialogInflater.inflate(R.layout.dialog_add_factor, null);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Add factor")
+                        .setView(dialogView)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                EditText etHours = dialogView.findViewById(R.id.et_hours);
+                                EditText etFactor = dialogView.findViewById(R.id.et_factor);
+                                int hours = Integer.parseInt(etHours.getText().toString());
+                                int factor = Integer.parseInt(etFactor.getText().toString());
+                                factors.add(new Factor(hours, factor));
+                                Collections.sort(factors);
+                                factorsRVAdapter.notifyDataSetChanged();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+                builder.create().show();
+            }
+        });
 
         return view;
     }
@@ -105,6 +150,11 @@ public class NewClientFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDeleteClick(Factor factor) {
+        // TODO
     }
 
     /**

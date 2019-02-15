@@ -29,4 +29,10 @@
     <string name="percent_sign">%</string>
     <string name="h">h</string>
     <string name="delete">Delete</string>
+    <string name="e_g_12">e.g. 12</string>
+    <string name="starting_from_hour">Starting from hour</string>
+    <string name="payment">Payment [%]</string>
+    <string name="e_g_120">e.g. 120</string>
+    <string name="cancel">CANCEL</string>
+    <string name="ok">OK</string>
 </resources>

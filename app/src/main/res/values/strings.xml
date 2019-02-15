@@ -26,4 +26,7 @@
     <string name="eur">EUR</string>
     <string name="overhour_payment_factors">Overhour payment factors</string>
     <string name="save">Save</string>
+    <string name="percent_sign">%</string>
+    <string name="h">h</string>
+    <string name="delete">Delete</string>
 </resources>

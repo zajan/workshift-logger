@@ -1,2 +1,2 @@
 # workshift-logger
-Android app for tracking and saving your working times.
+Android app for tracking your working times.

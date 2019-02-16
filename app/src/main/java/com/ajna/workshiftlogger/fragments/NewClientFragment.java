@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -97,7 +98,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         ImageView btnAddFactor = view.findViewById(R.id.btn_add_factor);
         btnAddFactor.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 LayoutInflater dialogInflater = getActivity().getLayoutInflater();
                 final View dialogView = dialogInflater.inflate(R.layout.dialog_add_factor, null);
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -113,12 +114,17 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
                                 factors.add(new Factor(hours, factor));
                                 Collections.sort(factors);
                                 factorsRVAdapter.notifyDataSetChanged();
+
+                                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
                             }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-
+                                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                             }
                         });
                 builder.create().show();

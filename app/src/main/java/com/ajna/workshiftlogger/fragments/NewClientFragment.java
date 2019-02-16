@@ -116,15 +116,17 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
                                 factorsRVAdapter.notifyDataSetChanged();
 
                                 InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-
-                            }
+                                if(inputManager != null){
+                                    inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                                }                            }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                                if(inputManager != null){
+                                    inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                                }
                             }
                         });
                 builder.create().show();

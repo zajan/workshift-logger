@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:fillViewport="true"    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -98,11 +99,12 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="96dp"
                 android:layout_height="wrap_content">
+
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/et_payment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"/>
+                    android:inputType="numberDecimal" />
             </android.support.design.widget.TextInputLayout>
 
 
@@ -123,9 +125,9 @@
             android:text="@string/overhour_payment_factors" />
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_factors"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rv_factors"/>
+            android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/btn_add_factor"
@@ -142,6 +144,10 @@
             android:background="@color/colorAccent"
             android:text="@string/save"
             android:textColor="@color/colorIcons" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
 
     </LinearLayout>
 </ScrollView>

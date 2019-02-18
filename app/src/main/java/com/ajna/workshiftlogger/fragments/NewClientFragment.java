@@ -22,6 +22,7 @@ import android.widget.RadioGroup;
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.adapters.FactorsRecyclerViewAdapter;
 import com.ajna.workshiftlogger.database.ClientsContract;
+import com.ajna.workshiftlogger.database.FactorsContract;
 import com.ajna.workshiftlogger.model.Client;
 import com.ajna.workshiftlogger.model.Factor;
 
@@ -153,36 +154,53 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveClient();
-                mListener.onSaveClicked();
+                if(saveClient()){
+                    mListener.onSaveClicked();
+                }
             }
         });
 
         return view;
     }
 
-    public void saveClient() {
-        if(validateName() && validatePayment()){
-
-            String name = etName.getText().toString().trim();
-            String paymentText = etBasePayment.getText().toString().trim();
-            int payment = Integer.parseInt(paymentText);
-            String officalName = etOfficialName.getText().toString().trim();
-            String address = etAddress.getText().toString().trim();
-            int paymentType;
-            int radioId = radioGroup.getCheckedRadioButtonId();
-            if(radioId == R.id.radio_flat_rate){
-                paymentType = 0;
-            } else if(radioId == R.id.radio_per_h){
-                paymentType = 1;
-            } else {
-                throw new IllegalArgumentException("No radio button selected");
-            }
-
-            Client client = new Client(name, officalName, address, paymentType, payment);
-
-            addClientToDB(client);
+    public boolean saveClient() {
+        if(!validateInput()){
+            return false;
         }
+
+        String name = etName.getText().toString().trim();
+        String paymentText = etBasePayment.getText().toString().trim();
+        int payment = Integer.parseInt(paymentText);
+        String officalName = etOfficialName.getText().toString().trim();
+        String address = etAddress.getText().toString().trim();
+        int paymentType;
+        int radioId = radioGroup.getCheckedRadioButtonId();
+        if (radioId == R.id.radio_flat_rate) {
+            paymentType = 0;
+        } else if (radioId == R.id.radio_per_h) {
+            paymentType = 1;
+        } else {
+            throw new IllegalArgumentException("No radio button selected");
+        }
+
+
+        Client client = new Client(name, officalName, address, paymentType, payment);
+        long clientId = addClientToDB(client);
+
+        if((factors != null) && factors.size()>0){
+            addFactors(clientId);
+        }
+
+        return true;
+    }
+
+    private boolean validateInput(){
+        // value of isNameValid and isPaymentValid are stored in var
+        // to make sure both of methods are executed so the user can see both error messages on input
+        boolean isNameValid = validateName();
+        boolean isPaymentValid = validatePayment();
+
+        return (isNameValid && isPaymentValid);
     }
 
     private boolean validateName() {
@@ -211,7 +229,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return true;
     }
 
-    private void addClientToDB(Client client){
+    private long addClientToDB(Client client) {
         ContentResolver contentResolver = getActivity().getContentResolver();
         ContentValues values = new ContentValues();
 
@@ -219,16 +237,32 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         values.put(ClientsContract.Columns.BASE_PAYMENT, client.getBasicPayment());
         values.put(ClientsContract.Columns.PAY_TYPE, client.getPaymentType());
 
-        if(!client.getOfficialName().isEmpty()){
+        if (!client.getOfficialName().isEmpty()) {
             values.put(ClientsContract.Columns.OFFICIAL_NAME, client.getOfficialName());
         }
 
-        if(!client.getAddress().isEmpty()){
+        if (!client.getAddress().isEmpty()) {
             values.put(ClientsContract.Columns.ADDRESS, client.getAddress());
         }
 
         Uri clientUri = contentResolver.insert(ClientsContract.CONTENT_URI, values);
-        long clientId = ClientsContract.getId(clientUri);
+
+        return ClientsContract.getId(clientUri);
+    }
+
+    private long addFactors(long clientId) {
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        ContentValues values = new ContentValues();
+
+        for(int i = 0; i <factors.size(); i++){
+            values.put(FactorsContract.Columns.CLIENT_ID, clientId);
+            values.put(FactorsContract.Columns.START_HOUR, factors.get(i).getHours());
+            values.put(FactorsContract.Columns.VALUE, factors.get(i).getFactorInPercent());
+        }
+
+        Uri factorUri = contentResolver.insert(FactorsContract.CONTENT_URI, values);
+
+        return FactorsContract.getId(factorUri);
     }
 
 

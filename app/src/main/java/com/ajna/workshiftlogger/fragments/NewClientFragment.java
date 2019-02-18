@@ -1,6 +1,8 @@
 package com.ajna.workshiftlogger.fragments;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -12,11 +14,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.adapters.FactorsRecyclerViewAdapter;
+import com.ajna.workshiftlogger.database.ClientsContract;
+import com.ajna.workshiftlogger.model.Client;
 import com.ajna.workshiftlogger.model.Factor;
 
 import java.util.ArrayList;
@@ -48,6 +54,12 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     private RecyclerView rvFactors;
     private FactorsRecyclerViewAdapter factorsRVAdapter;
 
+    private EditText etBasePayment;
+    private EditText etName;
+    private EditText etOfficialName;
+    private EditText etAddress;
+    private RadioGroup radioGroup;
+
     public NewClientFragment() {
         // Required empty public constructor
     }
@@ -78,16 +90,19 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-    EditText etBasePayment;
-    EditText etPayPerH;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_client, container, false);
+        etName = view.findViewById(R.id.et_name);
+        etOfficialName = view.findViewById(R.id.et_official_name);
+        etAddress = view.findViewById(R.id.et_address);
         etBasePayment = view.findViewById(R.id.et_payment);
+        radioGroup = view.findViewById(R.id.radiogroup);
 
-        if(factors == null) {
+        if (factors == null) {
             factors = new ArrayList<>();
         }
         rvFactors = view.findViewById(R.id.rv_factors);
@@ -116,15 +131,16 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
                                 factorsRVAdapter.notifyDataSetChanged();
 
                                 InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if(inputManager != null){
+                                if (inputManager != null) {
                                     inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                }                            }
+                                }
+                            }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if(inputManager != null){
+                                if (inputManager != null) {
                                     inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                                 }
                             }
@@ -133,13 +149,93 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             }
         });
 
+        Button btnSave = view.findViewById(R.id.btn_save);
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveClient();
+                mListener.onSaveClicked();
+            }
+        });
+
         return view;
     }
+
+    public void saveClient() {
+        if(validateName() && validatePayment()){
+
+            String name = etName.getText().toString().trim();
+            String paymentText = etBasePayment.getText().toString().trim();
+            int payment = Integer.parseInt(paymentText);
+            String officalName = etOfficialName.getText().toString().trim();
+            String address = etAddress.getText().toString().trim();
+            int paymentType;
+            int radioId = radioGroup.getCheckedRadioButtonId();
+            if(radioId == R.id.radio_flat_rate){
+                paymentType = 0;
+            } else if(radioId == R.id.radio_per_h){
+                paymentType = 1;
+            } else {
+                throw new IllegalArgumentException("No radio button selected");
+            }
+
+            Client client = new Client(name, officalName, address, paymentType, payment);
+
+            addClientToDB(client);
+        }
+    }
+
+    private boolean validateName() {
+        String name = etName.getText().toString().trim();
+        if (name.isEmpty()) {
+            etName.setError(getString(R.string.field_cannot_be_empty));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validatePayment() {
+        String paymentText = etBasePayment.getText().toString().trim();
+        if (paymentText.isEmpty()) {
+            etBasePayment.setError(getString(R.string.field_cannot_be_empty));
+            return false;
+        }
+
+        try {
+            int payment = Integer.parseInt(paymentText);
+        } catch (NumberFormatException e) {
+            etBasePayment.setError("Enter digits only");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void addClientToDB(Client client){
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        ContentValues values = new ContentValues();
+
+        values.put(ClientsContract.Columns.NAME, client.getName());
+        values.put(ClientsContract.Columns.BASE_PAYMENT, client.getBasicPayment());
+        values.put(ClientsContract.Columns.PAY_TYPE, client.getPaymentType());
+
+        if(!client.getOfficialName().isEmpty()){
+            values.put(ClientsContract.Columns.OFFICIAL_NAME, client.getOfficialName());
+        }
+
+        if(!client.getAddress().isEmpty()){
+            values.put(ClientsContract.Columns.ADDRESS, client.getAddress());
+        }
+
+        Uri clientUri = contentResolver.insert(ClientsContract.CONTENT_URI, values);
+        long clientId = ClientsContract.getId(clientUri);
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-          //  mListener.onFragmentInteraction(uri);
+            //  mListener.onFragmentInteraction(uri);
         }
     }
 
@@ -176,7 +272,6 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        //void onFragmentInteraction(Uri uri);
+        void onSaveClicked();
     }
 }

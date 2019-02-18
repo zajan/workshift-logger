@@ -64,6 +64,7 @@
             android:text="@string/payment_type" />
 
         <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/radiogroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -94,15 +95,21 @@
             android:layout_marginBottom="8dp"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/et_payment"
-                android:layout_width="72dp"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="96dp"
+                android:layout_height="wrap_content">
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/et_payment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"/>
+            </android.support.design.widget.TextInputLayout>
+
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="@string/eur" />
 
         </LinearLayout>

@@ -16,15 +16,13 @@ public class Client implements Serializable {
      */
     private int paymentType;
     private int basicPayment;
-    private List<Factor> factors;
 
-    public Client(String name, String officialName, String address, int paymentType, int basicPayment, List<Factor> factors) {
+    public Client(String name, String officialName, String address, int paymentType, int basicPayment) {
         this.name = name;
         this.officialName = officialName;
         this.address = address;
         this.paymentType = paymentType;
         this.basicPayment = basicPayment;
-        this.factors = factors;
     }
 
     public long get_id() {
@@ -51,9 +49,6 @@ public class Client implements Serializable {
         return basicPayment;
     }
 
-    public List<Factor> getFactors() {
-        return factors;
-    }
 
     public void setName(String name) {
         this.name = name;
@@ -73,9 +68,5 @@ public class Client implements Serializable {
 
     public void setBasicPayment(int basicPayment) {
         this.basicPayment = basicPayment;
-    }
-
-    public void setFactors(List<Factor> factors) {
-        this.factors = factors;
     }
 }

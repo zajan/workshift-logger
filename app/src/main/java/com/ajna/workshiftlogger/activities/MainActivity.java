@@ -176,4 +176,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .addToBackStack(null)
                 .commit();
     }
+
+    @Override
+    public void onSaveClicked() {
+        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+
+        if(backStackAmount >= 1) {
+            getSupportFragmentManager().popBackStack();
+            if (backStackAmount == 1) {
+                showUpButton(false);
+            }
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
 }

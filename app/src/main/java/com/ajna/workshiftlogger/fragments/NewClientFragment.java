@@ -294,7 +294,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             values.put(FactorsContract.Columns.START_HOUR, factors.get(i).getHours());
             values.put(FactorsContract.Columns.VALUE, factors.get(i).getFactorInPercent());
         }
-        
+
         if (mode == NewClientFragmentMode.EDIT) {
             String WHERE = FactorsContract.Columns.CLIENT_ID + " = ?";
             String[] ARGS = {String.valueOf(initClientId)};

@@ -15,12 +15,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ajna.workshiftlogger.R;
+import com.ajna.workshiftlogger.fragments.ActiveShiftFragment;
 import com.ajna.workshiftlogger.fragments.ClientsListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         ClientsListFragment.OnFragmentInteractionListener,
-        NewClientFragment.OnFragmentInteractionListener {
+        NewClientFragment.OnFragmentInteractionListener,
+        ActiveShiftFragment.OnFragmentInteractionListener{
     private static final String TAG = "MainActivity";
 
     private ActionBarDrawerToggle toggle;
@@ -52,8 +54,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             resolveUpButtonWithFragmentStack();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_main, new ClientsListFragment())
+                    .replace(R.id.fragment_main, ActiveShiftFragment.newInstance())
                     .commit();
+            navigationView.setCheckedItem(R.id.nav_shifts);
         }
     }
 
@@ -105,10 +108,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (id) {
             // TODO
             case R.id.nav_shifts:
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_main, ActiveShiftFragment.newInstance())
+                        .commit();
                 break;
             case R.id.nav_projects:
                 break;
             case R.id.nav_clients:
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_main, ClientsListFragment.newInstance())
+                        .commit();
                 break;
             case R.id.nav_invoices:
                 break;

@@ -34,14 +34,6 @@ import com.ajna.workshiftlogger.model.Client;
  */
 public class ClientsListFragment extends ListFragment
                 implements LoaderManager.LoaderCallbacks<Cursor>{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     static final String[] PROJECTION = new String[] {ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
             ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME};
@@ -64,28 +56,17 @@ public class ClientsListFragment extends ListFragment
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ClientsListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ClientsListFragment newInstance(String param1, String param2) {
+    public static ClientsListFragment newInstance() {
         ClientsListFragment fragment = new ClientsListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
         // For the cursor adapter, specify which columns go into which views
         String[] fromColumns = {ClientsContract.Columns.NAME};
         int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
@@ -95,9 +76,7 @@ public class ClientsListFragment extends ListFragment
         cursorAdapter = new SimpleCursorAdapter(getContext(),
                 android.R.layout.simple_list_item_1, null,
                 fromColumns, toViews, 0);
-//        cursorAdapter = new CursorAdapter(getContext(),
-//                android.R.layout.simple_list_item_1, null,
-//                fromColumns, toViews, 0);
+
         setListAdapter(cursorAdapter);
 
         // Prepare the loader. Either re-connect with an existing one,

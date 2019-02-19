@@ -8,7 +8,7 @@ import static com.ajna.workshiftlogger.database.MyContentProvider.CONTENT_AUTHOR
 import static com.ajna.workshiftlogger.database.MyContentProvider.CONTENT_AUTHORITY_URI;
 
 public class ClientsContract {
-    static final String TABLE_NAME = "Clients";
+    public static final String TABLE_NAME = "Clients";
 
     public static class Columns {
         public static final String _ID = BaseColumns._ID;

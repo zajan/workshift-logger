@@ -62,10 +62,16 @@ public class MyContentProvider extends ContentProvider {
 
         switch (match) {
             case CLIENTS:
-                queryBuilder.setTables(ClientsContract.TABLE_NAME);
+                // clients are always queried with matching factors
+                queryBuilder.setTables(ClientsContract.TABLE_NAME + " LEFT JOIN " + FactorsContract.TABLE_NAME
+                            + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
+                            + " = " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID);
                 break;
             case CLIENTS_ID:
-                queryBuilder.setTables(ClientsContract.TABLE_NAME);
+                // clients are always queried with matching factors
+                queryBuilder.setTables(ClientsContract.TABLE_NAME + " LEFT JOIN " + FactorsContract.TABLE_NAME
+                        + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
+                        + " = " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID);
                 long clientId = ClientsContract.getId(uri);
                 queryBuilder.appendWhere(ClientsContract.Columns._ID + " = " + clientId);
                 break;

@@ -5,11 +5,18 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,16 +45,20 @@ import java.util.List;
  * Use the {@link NewClientFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewClientFragment extends Fragment implements FactorsRecyclerViewAdapter.OnFactorClickListener {
+public class NewClientFragment extends Fragment implements FactorsRecyclerViewAdapter.OnFactorClickListener,
+        LoaderManager.LoaderCallbacks<Cursor>{
     private static final String TAG = "NewClientFragment";
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public static final int LOADER_ID = 1;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+
+    public enum NewClientFragmentMode {ADD, EDIT}
+
+    private static final String MODE = "mode";
+    private static final String INIT_CLIENT_NAME = "initClientName";
+
+    private NewClientFragmentMode mode;
+    private String initClientName;
+    private long initClientId;
 
     private OnFragmentInteractionListener mListener;
 
@@ -69,16 +80,15 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param initClientName set to null when create new client
+     *                       set to name of Client when editing.
      * @return A new instance of fragment NewClientFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static NewClientFragment newInstance(String param1, String param2) {
+    public static NewClientFragment newInstance(String initClientName) {
         NewClientFragment fragment = new NewClientFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(INIT_CLIENT_NAME, initClientName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -86,27 +96,34 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+        Bundle args = getArguments();
+        if (args != null) {
+            initClientName = args.getString(INIT_CLIENT_NAME);
         }
+
+        mode = (initClientName == null) ? NewClientFragmentMode.ADD : NewClientFragmentMode.EDIT;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_new_client, container, false);
+
         etName = view.findViewById(R.id.et_name);
         etOfficialName = view.findViewById(R.id.et_official_name);
         etAddress = view.findViewById(R.id.et_address);
         etBasePayment = view.findViewById(R.id.et_payment);
         radioGroup = view.findViewById(R.id.radiogroup);
+        rvFactors = view.findViewById(R.id.rv_factors);
+
+        if(mode == NewClientFragmentMode.EDIT){
+            getLoaderManager().initLoader(LOADER_ID, null, this);
+        }
 
         if (factors == null) {
             factors = new ArrayList<>();
         }
-        rvFactors = view.findViewById(R.id.rv_factors);
         factorsRVAdapter = new FactorsRecyclerViewAdapter(factors, this);
         rvFactors.setAdapter(factorsRVAdapter);
         rvFactors.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -163,6 +180,20 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return view;
     }
 
+    private void initializeValues(Client client){
+        Log.d(TAG, "initializeValues: starts");
+        etName.setText(client.getName());
+        etOfficialName.setText(client.getOfficialName());
+        etAddress.setText(client.getAddress());
+        etBasePayment.setText(Integer.toString(client.getBasicPayment()));
+        radioGroup.clearCheck();
+        if(client.getPaymentType() == 0){
+            radioGroup.check(R.id.radio_flat_rate);
+        } else {
+            radioGroup.check(R.id.radio_per_h);
+        }
+    }
+
     public boolean saveClient() {
         if(!validateInput()){
             return false;
@@ -188,7 +219,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         long clientId = addClientToDB(client);
 
         if((factors != null) && factors.size()>0){
-            addFactors(clientId);
+            addFactorsToDB(clientId);
         }
 
         return true;
@@ -245,33 +276,34 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             values.put(ClientsContract.Columns.ADDRESS, client.getAddress());
         }
 
-        Uri clientUri = contentResolver.insert(ClientsContract.CONTENT_URI, values);
-
-        return ClientsContract.getId(clientUri);
+        if(mode == NewClientFragmentMode.EDIT){
+            contentResolver.update(ClientsContract.buildUri(initClientId), values, null, null);
+            return initClientId;
+        } else {
+            Uri clientUri = contentResolver.insert(ClientsContract.CONTENT_URI, values);
+            return ClientsContract.getId(clientUri);
+        }
     }
 
-    private long addFactors(long clientId) {
+    private void addFactorsToDB(long clientId) {
         ContentResolver contentResolver = getActivity().getContentResolver();
         ContentValues values = new ContentValues();
 
-        for(int i = 0; i <factors.size(); i++){
+        for (int i = 0; i < factors.size(); i++) {
             values.put(FactorsContract.Columns.CLIENT_ID, clientId);
             values.put(FactorsContract.Columns.START_HOUR, factors.get(i).getHours());
             values.put(FactorsContract.Columns.VALUE, factors.get(i).getFactorInPercent());
         }
-
-        Uri factorUri = contentResolver.insert(FactorsContract.CONTENT_URI, values);
-
-        return FactorsContract.getId(factorUri);
-    }
-
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            //  mListener.onFragmentInteraction(uri);
+        
+        if (mode == NewClientFragmentMode.EDIT) {
+            String WHERE = FactorsContract.Columns.CLIENT_ID + " = ?";
+            String[] ARGS = {String.valueOf(initClientId)};
+            contentResolver.delete(FactorsContract.CONTENT_URI, WHERE, ARGS);
+        } else {
+            contentResolver.insert(FactorsContract.CONTENT_URI, values);
         }
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -290,6 +322,50 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         mListener = null;
     }
 
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        String[] PROJECTION = {ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.OFFICIAL_NAME,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.ADDRESS,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.PAY_TYPE,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.BASE_PAYMENT,
+                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID,
+                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.START_HOUR,
+                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.VALUE
+        };
+
+        String SELECTION = ClientsContract.Columns.NAME + " = ? ";
+        String SELECTION_ARGS[] = {initClientName};
+
+        return new CursorLoader(getContext(), ClientsContract.CONTENT_URI, PROJECTION, SELECTION, SELECTION_ARGS, null);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        Log.d(TAG, "onLoadFinished: starts");
+        cursor.moveToFirst();
+
+        initClientId = cursor.getLong(cursor.getColumnIndex(ClientsContract.Columns._ID));
+        Client client = new Client(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME)),
+                cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.OFFICIAL_NAME)),
+                cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.ADDRESS)),
+                cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)),
+                cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
+        factors.clear();
+        do{
+            factors.add(new Factor(cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)),
+                    cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.VALUE))));
+        } while (cursor.moveToNext());
+        initializeValues(client);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
+    }
     @Override
     public void onDeleteClick(Factor factor) {
         // TODO

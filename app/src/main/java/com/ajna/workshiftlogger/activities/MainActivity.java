@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onNewClientClicked() {
+    public void onClientClicked(String name) {
         Log.d(TAG, "onNewClientClicked: starts");
         toggle.setDrawerIndicatorEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -172,9 +172,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, new NewClientFragment())
+                .replace(R.id.fragment_main, NewClientFragment.newInstance(name))
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public void onNewClientClicked() {
+        Log.d(TAG, "onNewClientClicked: starts");
+        onClientClicked(null);
     }
 
     @Override

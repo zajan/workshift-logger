@@ -12,13 +12,17 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.database.ClientsContract;
+import com.ajna.workshiftlogger.model.Client;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,15 +43,16 @@ public class ClientsListFragment extends ListFragment
     private String mParam1;
     private String mParam2;
 
-    static final String[] PROJECTION = new String[] {ClientsContract.Columns._ID,
-            ClientsContract.Columns.NAME};
+    static final String[] PROJECTION = new String[] {ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
+            ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME};
 
     // This is the select criteria
     static final String SELECTION = "((" +
-            ClientsContract.Columns.NAME + " NOTNULL) AND (" +
-            ClientsContract.Columns.NAME + " != '' ))";
+            ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " NOTNULL) AND (" +
+            ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " != '' ))";
 
-    SimpleCursorAdapter cursorAdapter;
+//    SimpleCursorAdapter cursorAdapter;
+    CursorAdapter cursorAdapter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -90,6 +95,9 @@ public class ClientsListFragment extends ListFragment
         cursorAdapter = new SimpleCursorAdapter(getContext(),
                 android.R.layout.simple_list_item_1, null,
                 fromColumns, toViews, 0);
+//        cursorAdapter = new CursorAdapter(getContext(),
+//                android.R.layout.simple_list_item_1, null,
+//                fromColumns, toViews, 0);
         setListAdapter(cursorAdapter);
 
         // Prepare the loader. Either re-connect with an existing one,
@@ -111,14 +119,23 @@ public class ClientsListFragment extends ListFragment
             }
         });
 
+
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-        //    mListener.onFragmentInteraction(uri);
-        }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ListView listView = getListView();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
+                String clientName = cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME));
+                mListener.onClientClicked(clientName);
+            }
+        });
     }
 
     @Override
@@ -166,7 +183,7 @@ public class ClientsListFragment extends ListFragment
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
+        void onClientClicked(String name);
         void onNewClientClicked();
     }
 }

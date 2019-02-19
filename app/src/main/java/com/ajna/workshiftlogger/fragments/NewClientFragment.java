@@ -46,14 +46,13 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class NewClientFragment extends Fragment implements FactorsRecyclerViewAdapter.OnFactorClickListener,
-        LoaderManager.LoaderCallbacks<Cursor>{
+        LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "NewClientFragment";
     public static final int LOADER_ID = 1;
 
 
     public enum NewClientFragmentMode {ADD, EDIT}
 
-    private static final String MODE = "mode";
     private static final String INIT_CLIENT_NAME = "initClientName";
 
     private NewClientFragmentMode mode;
@@ -117,7 +116,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         radioGroup = view.findViewById(R.id.radiogroup);
         rvFactors = view.findViewById(R.id.rv_factors);
 
-        if(mode == NewClientFragmentMode.EDIT){
+        if (mode == NewClientFragmentMode.EDIT) {
             getLoaderManager().initLoader(LOADER_ID, null, this);
         }
 
@@ -171,7 +170,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(saveClient()){
+                if (saveClient()) {
                     mListener.onSaveClicked();
                 }
             }
@@ -180,14 +179,14 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return view;
     }
 
-    private void initializeValues(Client client){
+    private void initializeValues(Client client) {
         Log.d(TAG, "initializeValues: starts");
         etName.setText(client.getName());
         etOfficialName.setText(client.getOfficialName());
         etAddress.setText(client.getAddress());
         etBasePayment.setText(Integer.toString(client.getBasicPayment()));
         radioGroup.clearCheck();
-        if(client.getPaymentType() == 0){
+        if (client.getPaymentType() == 0) {
             radioGroup.check(R.id.radio_flat_rate);
         } else {
             radioGroup.check(R.id.radio_per_h);
@@ -195,14 +194,14 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     }
 
     public boolean saveClient() {
-        if(!validateInput()){
+        if (!validateInput()) {
             return false;
         }
 
         String name = etName.getText().toString().trim();
         String paymentText = etBasePayment.getText().toString().trim();
         int payment = Integer.parseInt(paymentText);
-        String officalName = etOfficialName.getText().toString().trim();
+        String officialName = etOfficialName.getText().toString().trim();
         String address = etAddress.getText().toString().trim();
         int paymentType;
         int radioId = radioGroup.getCheckedRadioButtonId();
@@ -215,17 +214,17 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         }
 
 
-        Client client = new Client(name, officalName, address, paymentType, payment);
+        Client client = new Client(name, officialName, address, paymentType, payment);
         long clientId = addClientToDB(client);
 
-        if((factors != null) && factors.size()>0){
+        if ((factors != null) && factors.size() > 0) {
             addFactorsToDB(clientId);
         }
 
         return true;
     }
 
-    private boolean validateInput(){
+    private boolean validateInput() {
         // value of isNameValid and isPaymentValid are stored in var
         // to make sure both of methods are executed so the user can see both error messages on input
         boolean isNameValid = validateName();
@@ -276,7 +275,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             values.put(ClientsContract.Columns.ADDRESS, client.getAddress());
         }
 
-        if(mode == NewClientFragmentMode.EDIT){
+        if (mode == NewClientFragmentMode.EDIT) {
             contentResolver.update(ClientsContract.buildUri(initClientId), values, null, null);
             return initClientId;
         } else {
@@ -293,17 +292,17 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             values.put(FactorsContract.Columns.CLIENT_ID, clientId);
             values.put(FactorsContract.Columns.START_HOUR, factors.get(i).getHours());
             values.put(FactorsContract.Columns.VALUE, factors.get(i).getFactorInPercent());
+
+            if (mode == NewClientFragmentMode.EDIT) {
+                String WHERE = FactorsContract.Columns.CLIENT_ID + " = ?";
+                String[] ARGS = {String.valueOf(initClientId)};
+                contentResolver.delete(FactorsContract.CONTENT_URI, WHERE, ARGS);
+            } else {
+                contentResolver.insert(FactorsContract.CONTENT_URI, values);
+            }
         }
 
-        if (mode == NewClientFragmentMode.EDIT) {
-            String WHERE = FactorsContract.Columns.CLIENT_ID + " = ?";
-            String[] ARGS = {String.valueOf(initClientId)};
-            contentResolver.delete(FactorsContract.CONTENT_URI, WHERE, ARGS);
-        } else {
-            contentResolver.insert(FactorsContract.CONTENT_URI, values);
-        }
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -355,10 +354,13 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
                 cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)),
                 cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
         factors.clear();
-        do{
-            factors.add(new Factor(cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)),
-                    cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.VALUE))));
+        do {
+            Factor factor = new Factor(cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)),
+                    cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.VALUE)));
+            factors.add(factor);
         } while (cursor.moveToNext());
+        factorsRVAdapter.notifyDataSetChanged();
+
         initializeValues(client);
     }
 
@@ -366,6 +368,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 
     }
+
     @Override
     public void onDeleteClick(Factor factor) {
         // TODO

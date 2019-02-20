@@ -1,6 +1,8 @@
 package com.ajna.workshiftlogger.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,12 +19,18 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.database.ClientsContract;
 import com.ajna.workshiftlogger.database.ProjectsContract;
+import com.ajna.workshiftlogger.model.Factor;
+
+import java.util.Collections;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -105,7 +113,7 @@ public class ProjectsListFragment extends ListFragment
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
                 String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
-                mListener.onProjectClicked(projectName);
+
             }
         });
     }

@@ -17,12 +17,13 @@ import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.fragments.ActiveShiftFragment;
 import com.ajna.workshiftlogger.fragments.ClientsListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
+import com.ajna.workshiftlogger.fragments.NewProjectFragment;
 import com.ajna.workshiftlogger.fragments.ProjectsListFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        ClientsListFragment.OnFragmentInteractionListener,
-        NewClientFragment.OnFragmentInteractionListener,
-        ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener{
+        ClientsListFragment.OnFragmentInteractionListener, NewClientFragment.OnFragmentInteractionListener,
+        ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener,
+        NewProjectFragment.OnFragmentInteractionListener{
     private static final String TAG = "MainActivity";
 
     private ActionBarDrawerToggle toggle;
@@ -212,11 +213,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onProjectClicked(String name) {
+        toggle.setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (!mToolBarNavigationListenerIsRegistered) {
+            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
 
+            mToolBarNavigationListenerIsRegistered = true;
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, NewProjectFragment.newInstance(name))
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
     public void onNewProjectClicked() {
-
+        onProjectClicked(null);
     }
 }

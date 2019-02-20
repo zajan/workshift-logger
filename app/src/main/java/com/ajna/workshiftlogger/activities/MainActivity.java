@@ -1,7 +1,5 @@
 package com.ajna.workshiftlogger.activities;
 
-import android.content.ContentResolver;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,18 +12,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.ajna.workshiftlogger.R;
-import com.ajna.workshiftlogger.database.FactorsContract;
 import com.ajna.workshiftlogger.fragments.ActiveShiftFragment;
 import com.ajna.workshiftlogger.fragments.ClientsListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
+import com.ajna.workshiftlogger.fragments.ProjectsListFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         ClientsListFragment.OnFragmentInteractionListener,
         NewClientFragment.OnFragmentInteractionListener,
-        ActiveShiftFragment.OnFragmentInteractionListener{
+        ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener{
     private static final String TAG = "MainActivity";
 
     private ActionBarDrawerToggle toggle;
@@ -61,30 +58,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .commit();
             navigationView.setCheckedItem(R.id.nav_shifts);
         }
-
-        ContentResolver contentResolver = getContentResolver();
-
-        Cursor cursor = contentResolver.query(FactorsContract.CONTENT_URI, null, null, null, null);
-        if(cursor != null && cursor.getCount() >0){
-            cursor.moveToFirst();
-            do {
-                String id = String.valueOf(cursor.getLong(cursor.getColumnIndex(FactorsContract.Columns._ID)));
-                String hours = String.valueOf(cursor.getLong(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)));
-                String value = String.valueOf(cursor.getLong(cursor.getColumnIndex(FactorsContract.Columns.VALUE)));
-                String clientId = String.valueOf(cursor.getLong(cursor.getColumnIndex(FactorsContract.Columns.CLIENT_ID)));
-                Log.d(TAG, "onCreate: ---------------");
-                Log.d(TAG, "onCreate: client id: " + clientId  + " id: " + id + " h: " + hours + " v: " +value);
-            } while (cursor.moveToNext());
-            cursor.close();
-        } else {
-            if (cursor == null){
-                Log.d(TAG, "onCreate: cursor == null");
-            } else {
-                Log.d(TAG, "onCreate: cursor.getCount() = " + cursor.getCount());
-            }
-        }
-
-
     }
 
     @Override
@@ -140,6 +113,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .commit();
                 break;
             case R.id.nav_projects:
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance())
+                        .commit();
                 break;
             case R.id.nav_clients:
                 getSupportFragmentManager().beginTransaction()
@@ -232,5 +208,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onProjectClicked(String name) {
+
+    }
+
+    @Override
+    public void onNewProjectClicked() {
+
     }
 }

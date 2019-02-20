@@ -92,7 +92,7 @@ public class MyContentProvider extends ContentProvider {
                 queryBuilder.appendWhere(ShiftsContract.Columns._ID + " = " + shiftId);
                 break;
             case PROJECTS:
-                queryBuilder.setTables(ClientsContract.TABLE_NAME);
+                queryBuilder.setTables(ProjectsContract.TABLE_NAME);
                 break;
             case PROJECTS_ID:
                 queryBuilder.setTables(ProjectsContract.TABLE_NAME);

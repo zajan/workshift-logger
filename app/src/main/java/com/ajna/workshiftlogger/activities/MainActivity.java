@@ -2,6 +2,7 @@ package com.ajna.workshiftlogger.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -110,17 +111,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // TODO
             case R.id.nav_shifts:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ActiveShiftFragment.newInstance())
+                        .replace(R.id.fragment_main, ActiveShiftFragment.newInstance(),
+                                ActiveShiftFragment.class.getSimpleName())
                         .commit();
                 break;
             case R.id.nav_projects:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance())
+                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance(),
+                                ProjectsListFragment.class.getSimpleName())
                         .commit();
                 break;
             case R.id.nav_clients:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ClientsListFragment.newInstance())
+                        .replace(R.id.fragment_main, ClientsListFragment.newInstance(ClientsListFragment.ClientListShowOrPick.SHOW),
+                                ClientsListFragment.class.getSimpleName())
                         .commit();
                 break;
             case R.id.nav_invoices:
@@ -185,9 +189,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, NewClientFragment.newInstance(name))
+                .replace(R.id.fragment_main, NewClientFragment.newInstance(name), NewClientFragment.class.getSimpleName())
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public void onClientPicked(String name) {
+        // TODO pass name back to new project fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack();
+
+        NewProjectFragment fragment = (NewProjectFragment) fragmentManager.findFragmentByTag(NewProjectFragment.class.getSimpleName());
+        if(fragment != null){
+            fragment.updateClient(name);
+        }
+
     }
 
     @Override
@@ -227,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, NewProjectFragment.newInstance(name))
+                .replace(R.id.fragment_main, NewProjectFragment.newInstance(name), NewProjectFragment.class.getSimpleName())
                 .addToBackStack(null)
                 .commit();
     }
@@ -235,5 +252,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onNewProjectClicked() {
         onProjectClicked(null);
+    }
+
+    @Override
+    public void onSelectClientClicked() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, ClientsListFragment.newInstance(ClientsListFragment.ClientListShowOrPick.PICK),
+                        ClientsListFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onProjectSaved() {
+        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+
+        if(backStackAmount >= 1) {
+            getSupportFragmentManager().popBackStack();
+            if (backStackAmount == 1) {
+                showUpButton(false);
+            }
+        }
+        else {
+            super.onBackPressed();
+        }
     }
 }

@@ -21,7 +21,7 @@
     </android.support.design.widget.TextInputLayout>
 
     <TextView
-        android:id="@+id/tv_client"
+        android:id="@+id/tv_client_for_project"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"

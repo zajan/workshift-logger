@@ -38,4 +38,5 @@
     <string name="field_cannot_be_empty">Field cannot be empty</string>
     <string name="project_name">Project name</string>
     <string name="select_client">Select client..</string>
+    <string name="client_must_be_selected">Client must be selected</string>
 </resources>

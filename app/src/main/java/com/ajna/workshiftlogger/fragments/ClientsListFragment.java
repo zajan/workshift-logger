@@ -34,6 +34,11 @@ import com.ajna.workshiftlogger.model.Client;
  */
 public class ClientsListFragment extends ListFragment
                 implements LoaderManager.LoaderCallbacks<Cursor>{
+    /**
+     * use SHOW value when open this fragment to display and/or edit client records
+     * use PICK value when open this fragment to pick one client record for project
+     */
+    public enum ClientListShowOrPick {SHOW, PICK}
 
     static final String[] PROJECTION = new String[] {ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
             ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME};
@@ -43,8 +48,10 @@ public class ClientsListFragment extends ListFragment
             ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " NOTNULL) AND (" +
             ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " != '' ))";
 
-//    SimpleCursorAdapter cursorAdapter;
-    CursorAdapter cursorAdapter;
+    private ClientListShowOrPick mode;
+    private static final String MODE_SHOW_OR_PICK = "modeShowOrPick";
+
+    SimpleCursorAdapter cursorAdapter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -59,14 +66,23 @@ public class ClientsListFragment extends ListFragment
      * @return A new instance of fragment ClientsListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ClientsListFragment newInstance() {
+    public static ClientsListFragment newInstance(ClientListShowOrPick modeShowOrPick) {
         ClientsListFragment fragment = new ClientsListFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(MODE_SHOW_OR_PICK, modeShowOrPick);
+        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            mode = (ClientListShowOrPick) args.getSerializable(MODE_SHOW_OR_PICK);
+        }
+
         // For the cursor adapter, specify which columns go into which views
         String[] fromColumns = {ClientsContract.Columns.NAME};
         int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
@@ -112,7 +128,11 @@ public class ClientsListFragment extends ListFragment
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
                 String clientName = cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME));
-                mListener.onClientClicked(clientName);
+                if(mode == ClientListShowOrPick.SHOW){
+                    mListener.onClientClicked(clientName);
+                } else {
+                    mListener.onClientPicked(clientName);
+                }
             }
         });
     }
@@ -163,6 +183,7 @@ public class ClientsListFragment extends ListFragment
      */
     public interface OnFragmentInteractionListener {
         void onClientClicked(String name);
+        void onClientPicked(String name);
         void onNewClientClicked();
     }
 }

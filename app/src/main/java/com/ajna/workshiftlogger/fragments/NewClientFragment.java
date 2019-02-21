@@ -217,6 +217,10 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         Client client = new Client(name, officialName, address, paymentType, payment);
         long clientId = addClientToDB(client);
 
+        if(clientId < 0){
+            return false;
+        }
+
         if ((factors != null) && factors.size() > 0) {
             addFactorsToDB(clientId);
         }
@@ -225,18 +229,17 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     }
 
     private boolean validateInput() {
-        // value of isNameValid and isPaymentValid are stored in var
-        // to make sure both of methods are executed so the user can see both error messages on input
-        boolean isNameValid = validateName();
-        boolean isPaymentValid = validatePayment();
-
-        return (isNameValid && isPaymentValid);
+        return (validateName() & validatePayment());
     }
 
     private boolean validateName() {
         String name = etName.getText().toString().trim();
         if (name.isEmpty()) {
             etName.setError(getString(R.string.field_cannot_be_empty));
+            return false;
+        }
+        if(name.equals(getString(R.string.select_client))){
+            etName.setError("Name not allowed");
             return false;
         }
         return true;

@@ -92,10 +92,15 @@ public class MyContentProvider extends ContentProvider {
                 queryBuilder.appendWhere(ShiftsContract.Columns._ID + " = " + shiftId);
                 break;
             case PROJECTS:
-                queryBuilder.setTables(ProjectsContract.TABLE_NAME);
+                // projects are queried together with client with which they are associated
+                queryBuilder.setTables(ProjectsContract.TABLE_NAME + " INNER JOIN " + ClientsContract.TABLE_NAME
+                    + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
+                    + " = " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID);
                 break;
             case PROJECTS_ID:
-                queryBuilder.setTables(ProjectsContract.TABLE_NAME);
+                queryBuilder.setTables(ProjectsContract.TABLE_NAME + " INNER JOIN " + ClientsContract.TABLE_NAME
+                        + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
+                        + " = " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID);
                 long projectId = ProjectsContract.getId(uri);
                 queryBuilder.appendWhere(ProjectsContract.Columns._ID + " = " + projectId);
                 break;

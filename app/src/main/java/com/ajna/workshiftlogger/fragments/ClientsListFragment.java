@@ -158,7 +158,7 @@ public class ClientsListFragment extends ListFragment
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
         return new CursorLoader(getContext(), ClientsContract.CONTENT_URI,
-                PROJECTION, SELECTION, null, null);
+                PROJECTION, null, null, null);
     }
 
     @Override

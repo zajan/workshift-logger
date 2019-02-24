@@ -42,7 +42,7 @@ import java.util.Collections;
  */
 public class ProjectsListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
-    
+
     static final String[] PROJECTION = new String[] {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
             ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME};
 
@@ -113,6 +113,7 @@ public class ProjectsListFragment extends ListFragment
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
                 String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
+                mListener.onProjectClicked(projectName);
 
             }
         });
@@ -156,10 +157,6 @@ public class ProjectsListFragment extends ListFragment
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
         void onProjectClicked(String name);

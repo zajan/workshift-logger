@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +24,9 @@ import android.widget.Toast;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.database.ClientsContract;
+import com.ajna.workshiftlogger.database.FactorsContract;
 import com.ajna.workshiftlogger.database.ProjectsContract;
+import com.ajna.workshiftlogger.model.Client;
 import com.ajna.workshiftlogger.model.Project;
 
 /**
@@ -32,12 +37,19 @@ import com.ajna.workshiftlogger.model.Project;
  * Use the {@link NewProjectFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewProjectFragment extends Fragment {
+public class NewProjectFragment extends Fragment  implements LoaderManager.LoaderCallbacks<Cursor>{
     private static final String TAG = "NewProjectFragment";
+
+    public enum NewProjectFragmentMode {ADD, EDIT}
+
+    private NewProjectFragmentMode mode;
+
+    public static final int LOADER_ID = 8;
 
     private static final String INIT_PROJECT_NAME = "initProjectName";
 
     private String initProjectName;
+    private long initProjectId;
     private String clientName;
 
     private OnFragmentInteractionListener mListener;
@@ -72,6 +84,11 @@ public class NewProjectFragment extends Fragment {
         if (getArguments() != null) {
             initProjectName = getArguments().getString(INIT_PROJECT_NAME);
         }
+        if(initProjectName != null){
+            mode = NewProjectFragmentMode.EDIT;
+        } else {
+            mode = NewProjectFragmentMode.ADD;
+        }
     }
 
     @Override
@@ -79,6 +96,9 @@ public class NewProjectFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_project, container, false);
+        if (mode == NewProjectFragmentMode.EDIT) {
+            getLoaderManager().initLoader(LOADER_ID, null, this);
+        }
         return view;
     }
 
@@ -150,10 +170,14 @@ public class NewProjectFragment extends Fragment {
 
         values.put(ProjectsContract.Columns.NAME, project.getName());
         values.put(ProjectsContract.Columns.CLIENT_ID, project.getClientId());
-
-        Uri projectUri = contentResolver.insert(ProjectsContract.CONTENT_URI, values);
-
-        return ProjectsContract.getId(projectUri);
+        Uri projectUri;
+        if(mode == NewProjectFragmentMode.EDIT) {
+            contentResolver.update(ProjectsContract.buildUri(initProjectId), values, null, null);
+            return initProjectId;
+        } else {
+            projectUri = contentResolver.insert(ProjectsContract.CONTENT_URI, values);
+            return ProjectsContract.getId(projectUri);
+        }
     }
 
     private boolean validateName() {
@@ -189,6 +213,40 @@ public class NewProjectFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+    private void initializeValues(Project project){
+        etProjectName.setText(project.getName());
+        tvClientName.setText(project.getClientName());
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+            String[] PROJECTION = {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
+                    ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME,
+                    ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME};
+            String SELECTION = ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " = ? ";
+            String SELECTION_ARGS[] = {initProjectName};
+
+            return new CursorLoader(getContext(), ProjectsContract.CONTENT_URI, PROJECTION, SELECTION, SELECTION_ARGS, null);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        cursor.moveToFirst();
+
+        initProjectId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.Columns._ID));
+        String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
+        String clientName = cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME));
+        Log.d(TAG, "onLoadFinished: ---------------------");
+        Log.d(TAG, "onLoadFinished: projectName: " + projectName + "  clientName: " + clientName);
+        Project project = new Project(projectName, clientName);
+        initializeValues(project);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
     }
 
     /**

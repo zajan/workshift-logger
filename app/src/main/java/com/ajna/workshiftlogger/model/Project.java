@@ -6,11 +6,17 @@ public class Project implements Serializable{
     public static final long serialVersionUID = 20190215L;
 
     private String name;
+    private String clientName;
     private long clientId;
 
     public Project(String name, long clientId) {
         this.name = name;
         this.clientId = clientId;
+    }
+
+    public Project(String name, String clientName) {
+        this.name = name;
+        this.clientName = clientName;
     }
 
     public String getName() {
@@ -27,5 +33,13 @@ public class Project implements Serializable{
 
     public void setClientId(long clientId) {
         this.clientId = clientId;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 }

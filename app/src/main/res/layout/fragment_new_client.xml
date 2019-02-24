@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="?attr/actionBarSize"
     android:fillViewport="true"    >
 
     <LinearLayout
@@ -132,6 +131,7 @@
 
         <ImageView
             android:id="@+id/btn_add_factor"
+            android:contentDescription="@string/add_factor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"

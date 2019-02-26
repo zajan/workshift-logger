@@ -179,7 +179,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return view;
     }
 
-    private void initializeValues(Client client) {
+    private void initializeValues(Client client, List<Factor> factors) {
         Log.d(TAG, "initializeValues: starts");
         etName.setText(client.getName());
         etOfficialName.setText(client.getOfficialName());
@@ -191,6 +191,9 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         } else {
             radioGroup.check(R.id.radio_per_h);
         }
+        
+        this.factors.clear();
+        this.factors.addAll(factors);
     }
 
     public boolean saveClient() {
@@ -358,13 +361,14 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
                 cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
         factors.clear();
         do {
+            List<Factor> factors = new ArrayList<>();
             Factor factor = new Factor(cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)),
                     cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.VALUE)));
             factors.add(factor);
         } while (cursor.moveToNext());
         factorsRVAdapter.notifyDataSetChanged();
 
-        initializeValues(client);
+        initializeValues(client, factors);
     }
 
     @Override

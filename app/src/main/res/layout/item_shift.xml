@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:stretchColumns="0,1,2,3">
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_report_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="12.12.2018" />
+
+        <TextView
+            android:id="@+id/tv_report_client"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="BTL Rigging" />
+
+        <TextView
+            android:id="@+id/tv_report_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="3h" />
+
+        <TextView
+            android:id="@+id/tv_report_payment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="125 EUR" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_report_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            tools:text="12:00 - 15:35" />
+
+        <TextView
+            android:id="@+id/tv_report_projekt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            tools:text="Projekt 1234" />
+    </TableRow>
+
+</TableLayout>

@@ -26,6 +26,8 @@ public class MyContentProvider extends ContentProvider {
     public static final int FACTORS_ID = 21;
     public static final int SHIFTS = 30;
     public static final int SHIFTS_ID = 31;
+    public static final int SHIFTS_FULL_INFO = 32;
+    public static final int SHIFTS_FULL_INFO_ID = 33;
     public static final int PROJECTS = 40;
     public static final int PROJECTS_ID = 41;
 
@@ -43,6 +45,9 @@ public class MyContentProvider extends ContentProvider {
 
         matcher.addURI(CONTENT_AUTHORITY, ProjectsContract.TABLE_NAME, PROJECTS);
         matcher.addURI(CONTENT_AUTHORITY, ProjectsContract.TABLE_NAME + "/#", PROJECTS_ID);
+
+        matcher.addURI(CONTENT_AUTHORITY, ShiftFullInfoViewContract.TABLE_NAME, SHIFTS_FULL_INFO);
+        matcher.addURI(CONTENT_AUTHORITY, ShiftFullInfoViewContract.TABLE_NAME + "/#", SHIFTS_FULL_INFO_ID);
 
         return matcher;
     }
@@ -103,6 +108,14 @@ public class MyContentProvider extends ContentProvider {
                         + " = " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID);
                 long projectId = ProjectsContract.getId(uri);
                 queryBuilder.appendWhere(ProjectsContract.Columns._ID + " = " + projectId);
+                break;
+            case SHIFTS_FULL_INFO:
+                queryBuilder.setTables(ShiftFullInfoViewContract.TABLE_NAME);
+                break;
+            case SHIFTS_FULL_INFO_ID:
+                queryBuilder.setTables(ShiftFullInfoViewContract.TABLE_NAME);
+                long shiftInfoId = ShiftFullInfoViewContract.getId(uri);
+                queryBuilder.appendWhere(ShiftFullInfoViewContract.Columns._ID + " = " + shiftInfoId);
                 break;
         }
 

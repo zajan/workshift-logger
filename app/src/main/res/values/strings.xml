@@ -40,4 +40,8 @@
     <string name="select_client">Select client..</string>
     <string name="client_must_be_selected">Client must be selected</string>
     <string name="add_factor">Add factor</string>
+    <string name="no_active_shift">No active shift</string>
+    <string name="quick_start">Quick start</string>
+    <string name="log_finished_shift">Log finished shift</string>
+    <string name="start">start</string>
 </resources>

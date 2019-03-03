@@ -1,5 +1,8 @@
 package com.ajna.workshiftlogger.activities;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
@@ -15,16 +18,21 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.ajna.workshiftlogger.R;
+import com.ajna.workshiftlogger.database.ShiftsContract;
 import com.ajna.workshiftlogger.fragments.ActiveShiftFragment;
+import com.ajna.workshiftlogger.fragments.ActiveShiftNoneFragment;
 import com.ajna.workshiftlogger.fragments.ClientsListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
 import com.ajna.workshiftlogger.fragments.NewProjectFragment;
 import com.ajna.workshiftlogger.fragments.ProjectsListFragment;
+import com.ajna.workshiftlogger.fragments.ShiftsFragment;
+import com.ajna.workshiftlogger.fragments.ShiftsListFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         ClientsListFragment.OnFragmentInteractionListener, NewClientFragment.OnFragmentInteractionListener,
         ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener,
-        NewProjectFragment.OnFragmentInteractionListener{
+        NewProjectFragment.OnFragmentInteractionListener, ShiftsFragment.OnFragmentInteractionListener,
+        ActiveShiftNoneFragment.OnFragmentInteractionListener, ShiftsListFragment.OnFragmentInteractionListener {
     private static final String TAG = "MainActivity";
 
     private ActionBarDrawerToggle toggle;
@@ -56,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             resolveUpButtonWithFragmentStack();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_main, ActiveShiftFragment.newInstance())
+                    .replace(R.id.fragment_main, ShiftsFragment.newInstance())
                     .commit();
             navigationView.setCheckedItem(R.id.nav_shifts);
         }
@@ -111,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // TODO
             case R.id.nav_shifts:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ActiveShiftFragment.newInstance(),
+                        .replace(R.id.fragment_main, ShiftsFragment.newInstance(),
                                 ActiveShiftFragment.class.getSimpleName())
                         .commit();
                 break;
@@ -196,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onClientPicked(String name) {
-        // TODO pass name back to new project fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.popBackStack();
 

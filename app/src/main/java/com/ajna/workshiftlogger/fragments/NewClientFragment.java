@@ -191,7 +191,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         } else {
             radioGroup.check(R.id.radio_per_h);
         }
-        
+
         this.factors.clear();
         this.factors.addAll(factors);
     }

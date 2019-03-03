@@ -38,16 +38,13 @@ public class ActiveShiftNoneFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ActiveShiftNoneFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ActiveShiftNoneFragment newInstance(String param1, String param2) {
+    public static ActiveShiftNoneFragment newInstance() {
         ActiveShiftNoneFragment fragment = new ActiveShiftNoneFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -68,12 +65,7 @@ public class ActiveShiftNoneFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_active_shift_none, container, false);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -103,7 +95,6 @@ public class ActiveShiftNoneFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+
     }
 }

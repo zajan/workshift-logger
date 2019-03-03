@@ -8,7 +8,7 @@ import android.util.Log;
 public class MyDBHelper extends SQLiteOpenHelper {
     private static final String TAG = "MyDBHelper";
     private static String DATABASE_NAME = "WorkshiftLogger.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static MyDBHelper instance = null;
 
     private MyDBHelper(Context context) {
@@ -60,70 +60,24 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 ShiftsContract.Columns.PROJECT_ID + " INTEGER);";
         Log.d(TAG, "onCreate: " + sql);
         db.execSQL(sql);
-
-        addShiftFullInfoView(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         switch (oldVersion) {
             case 1:
-                addShiftFullInfoView(sqLiteDatabase);
+                break;
+            case 2:
+                dropShiftFullInfoView(sqLiteDatabase);
                 break;
             default:
                 throw new IllegalStateException("onUpgrade() with unknown newVersion: " + newVersion);
         }
     }
 
-    private void addShiftFullInfoView(SQLiteDatabase db){
-        /*
-        CREATE VIEW vwShiftFullInfo AS SELECT
-        Shifts.StartTime,
-        Shifts.EndTime,
-        Shifts.Pause,
-        Projects.Name,
-        Clients.Name,
-        Clients.OfficialName,
-        Clients.Address,
-        Clients.Payment,
-        Clients.PaymentTime,
-        Factors.Hours,
-        Factors.Value
-        FROM Shifts
-        INNER JOIN Projects ON Projects._id = Shifts.ProjectId
-        INNER JOIN Clients ON Clients._id = Projects.ClientId
-        LEFT JOIN Factors ON Clients._id = Factors.ClientId;
-         */
-
-        String sql;
-
-        sql = "CREATE VIEW " + ShiftFullInfoViewContract.TABLE_NAME + " AS SELECT "
-                + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns._ID + " AS " + ShiftFullInfoViewContract.Columns._ID + ", "
-                + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.START_TIME + " AS " + ShiftFullInfoViewContract.Columns.START_TIME + ", "
-                + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.END_TIME + " AS " + ShiftFullInfoViewContract.Columns.END_TIME + ", "
-                + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PAUSE + " AS " + ShiftFullInfoViewContract.Columns.PAUSE + ", "
-                + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " AS " + ShiftFullInfoViewContract.Columns.PROJECT_NAME + ", "
-                + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " AS " + ShiftFullInfoViewContract.Columns.CLIENT_NAME + ", "
-                + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.OFFICIAL_NAME + " AS " + ShiftFullInfoViewContract.Columns.CLIENT_OFFICIAL_NAME + ", "
-                + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.ADDRESS + " AS " + ShiftFullInfoViewContract.Columns.CLIENT_ADDRESS + ", "
-                + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.BASE_PAYMENT + " AS " + ShiftFullInfoViewContract.Columns.BASE_PAYMENT + ", "
-                + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.PAY_TYPE + " AS " + ShiftFullInfoViewContract.Columns.PAYMENT_TYPE + ", "
-                + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.START_HOUR + " AS " + ShiftFullInfoViewContract.Columns.FACTOR_HOUR + ", "
-                + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.VALUE + " AS " + ShiftFullInfoViewContract.Columns.FACTOR_VALUE
-
-                + " FROM " + ShiftsContract.TABLE_NAME
-                + " INNER JOIN " + ProjectsContract.TABLE_NAME
-                + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID
-                + " = " + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PROJECT_ID
-
-                + " INNER JOIN " + ClientsContract.TABLE_NAME
-                + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
-                + " = " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
-
-                + " LEFT JOIN " + FactorsContract.TABLE_NAME
-                + " ON " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID + ";";
-        Log.d(TAG, "addShiftFullInfoView: sql = " + sql);
+    private void dropShiftFullInfoView(SQLiteDatabase db){
+        String sql = "DROP VIEW IF EXISTS " + "ShiftFullInfoView";
         db.execSQL(sql);
-
     }
+
 }

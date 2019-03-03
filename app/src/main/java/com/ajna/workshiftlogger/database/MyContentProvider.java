@@ -26,8 +26,6 @@ public class MyContentProvider extends ContentProvider {
     public static final int FACTORS_ID = 21;
     public static final int SHIFTS = 30;
     public static final int SHIFTS_ID = 31;
-    public static final int SHIFTS_FULL_INFO = 32;
-    public static final int SHIFTS_FULL_INFO_ID = 33;
     public static final int PROJECTS = 40;
     public static final int PROJECTS_ID = 41;
 
@@ -45,9 +43,6 @@ public class MyContentProvider extends ContentProvider {
 
         matcher.addURI(CONTENT_AUTHORITY, ProjectsContract.TABLE_NAME, PROJECTS);
         matcher.addURI(CONTENT_AUTHORITY, ProjectsContract.TABLE_NAME + "/#", PROJECTS_ID);
-
-        matcher.addURI(CONTENT_AUTHORITY, ShiftFullInfoViewContract.TABLE_NAME, SHIFTS_FULL_INFO);
-        matcher.addURI(CONTENT_AUTHORITY, ShiftFullInfoViewContract.TABLE_NAME + "/#", SHIFTS_FULL_INFO_ID);
 
         return matcher;
     }
@@ -89,13 +84,32 @@ public class MyContentProvider extends ContentProvider {
                 queryBuilder.appendWhere(FactorsContract.Columns._ID + " = " + factorId);
                 break;
             case SHIFTS:
-                queryBuilder.setTables(ShiftsContract.TABLE_NAME);
+                queryBuilder.setTables(ShiftsContract.TABLE_NAME + " INNER JOIN " + ProjectsContract.TABLE_NAME
+                        + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID
+                        + " = " + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PROJECT_ID
+
+                        + " INNER JOIN " + ClientsContract.TABLE_NAME
+                        + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
+                        + " = " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
+
+                        + " LEFT JOIN " + FactorsContract.TABLE_NAME
+                        + " ON " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID);
                 break;
             case SHIFTS_ID:
-                queryBuilder.setTables(ShiftsContract.TABLE_NAME);
+                queryBuilder.setTables(ShiftsContract.TABLE_NAME + " INNER JOIN " + ProjectsContract.TABLE_NAME
+                        + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID
+                        + " = " + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PROJECT_ID
+
+                        + " INNER JOIN " + ClientsContract.TABLE_NAME
+                        + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
+                        + " = " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
+
+                        + " LEFT JOIN " + FactorsContract.TABLE_NAME
+                        + " ON " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID);
                 long shiftId = ShiftsContract.getId(uri);
                 queryBuilder.appendWhere(ShiftsContract.Columns._ID + " = " + shiftId);
                 break;
+
             case PROJECTS:
                 // projects are queried together with client with which they are associated
                 queryBuilder.setTables(ProjectsContract.TABLE_NAME + " INNER JOIN " + ClientsContract.TABLE_NAME
@@ -108,14 +122,6 @@ public class MyContentProvider extends ContentProvider {
                         + " = " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID);
                 long projectId = ProjectsContract.getId(uri);
                 queryBuilder.appendWhere(ProjectsContract.Columns._ID + " = " + projectId);
-                break;
-            case SHIFTS_FULL_INFO:
-                queryBuilder.setTables(ShiftFullInfoViewContract.TABLE_NAME);
-                break;
-            case SHIFTS_FULL_INFO_ID:
-                queryBuilder.setTables(ShiftFullInfoViewContract.TABLE_NAME);
-                long shiftInfoId = ShiftFullInfoViewContract.getId(uri);
-                queryBuilder.appendWhere(ShiftFullInfoViewContract.Columns._ID + " = " + shiftInfoId);
                 break;
         }
 

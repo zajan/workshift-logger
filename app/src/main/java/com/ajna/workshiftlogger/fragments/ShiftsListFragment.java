@@ -2,7 +2,6 @@ package com.ajna.workshiftlogger.fragments;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,13 +11,17 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.adapters.ShiftsRecyclerViewAdapter;
-import com.ajna.workshiftlogger.database.ShiftFullInfoViewContract;
+import com.ajna.workshiftlogger.database.ClientsContract;
+import com.ajna.workshiftlogger.database.FactorsContract;
+import com.ajna.workshiftlogger.database.ProjectsContract;
+import com.ajna.workshiftlogger.database.ShiftsContract;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,6 +32,7 @@ import com.ajna.workshiftlogger.database.ShiftFullInfoViewContract;
  * create an instance of this fragment.
  */
 public class ShiftsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private static final String TAG = "ShiftsListFragment";
 
     public static final int LOADER_ID = 5;
 
@@ -97,25 +101,27 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        String[] projection = {ShiftFullInfoViewContract.Columns._ID,
-                ShiftFullInfoViewContract.Columns.START_TIME,
-                ShiftFullInfoViewContract.Columns.END_TIME,
-                ShiftFullInfoViewContract.Columns.PROJECT_NAME,
-                ShiftFullInfoViewContract.Columns.CLIENT_NAME,
-                ShiftFullInfoViewContract.Columns.BASE_PAYMENT,
-                ShiftFullInfoViewContract.Columns.PAYMENT_TYPE,
-                ShiftFullInfoViewContract.Columns.PAUSE,
-                ShiftFullInfoViewContract.Columns.FACTOR_VALUE,
-                ShiftFullInfoViewContract.Columns.FACTOR_HOUR};
+
+        String[] projection = {ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns._ID,
+                ShiftsContract.Columns.START_TIME,
+                ShiftsContract.Columns.END_TIME,
+                ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " AS " + ShiftsContract.FullInfoColumns.PROJECT_NAME,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " AS " + ShiftsContract.FullInfoColumns.CLIENT_NAME,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.BASE_PAYMENT,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.PAY_TYPE,
+                ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PAUSE,
+                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.VALUE,
+                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.START_HOUR};
         String selection = null;
         String[] selectionArgs = null;
         String sortOrder = null;
 
-        return new CursorLoader(getContext(), ShiftFullInfoViewContract.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
+        return new CursorLoader(getContext(), ShiftsContract.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG, "onLoadFinished: cursor.getCount(): " + data.getCount());
         shiftsRVAdapter.swapCursor(data);
     }
 

@@ -4,13 +4,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ajna.workshiftlogger.R;
-import com.ajna.workshiftlogger.database.ShiftFullInfoViewContract;
+import com.ajna.workshiftlogger.database.ClientsContract;
+import com.ajna.workshiftlogger.database.ShiftsContract;
+import com.ajna.workshiftlogger.model.Shift;
 
 public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecyclerViewAdapter.ShiftsViewHolder> {
     private static final String TAG = "ShiftsRecyclerViewAdapt";
@@ -40,19 +43,35 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
             throw new IllegalStateException("Couldn't move cursor to position " + position);
         }
 
-        long startTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftFullInfoViewContract.Columns.START_TIME));
-        long endTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftFullInfoViewContract.Columns.END_TIME));
-        String clientName = cursor.getString(cursor.getColumnIndex(ShiftFullInfoViewContract.Columns.CLIENT_NAME));
-        String projectName = cursor.getString(cursor.getColumnIndex(ShiftFullInfoViewContract.Columns.PROJECT_NAME));
-        long basePayment = cursor.getLong(cursor.getColumnIndex(ShiftFullInfoViewContract.Columns.BASE_PAYMENT));
+        long startTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.START_TIME));
+        long endTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME));
 
+        String clientName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_NAME));
+        String projectName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME));
+
+        int basePayment = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT));
+        Log.d(TAG, "onBindViewHolder: clientName: " + clientName);
+        Log.d(TAG, "onBindViewHolder: projectName: " + projectName);
+
+
+        Shift shift = new Shift();
+        shift.setBasePayment(basePayment);
+        shift.setStartTime(startTimeDate);
+        shift.setEndTime(endTimeDate);
+
+        long duration = shift.calculateDuration();
         holder.tvProjectName.setText(projectName);
         holder.tvClientName.setText(clientName);
+        holder.tvDuration.setText(String.valueOf(duration));
+
 
     }
 
     @Override
     public int getItemCount() {
+        if(cursor != null){
+            Log.d(TAG, "getItemCount: " + cursor.getCount());
+        }
         return cursor == null ? 0 : cursor.getCount();
     }
 

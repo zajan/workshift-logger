@@ -44,4 +44,8 @@
     <string name="quick_start">Quick start</string>
     <string name="log_finished_shift">Log finished shift</string>
     <string name="start">start</string>
+    <string name="stop">stop</string>
+    <string name="message_successfull_added">Your shift has been successfully added</string>
+    <string name="message_problem_adding">There was a problem with adding the shift..</string>
+    <string name="default_empty_text_value">-</string>
 </resources>

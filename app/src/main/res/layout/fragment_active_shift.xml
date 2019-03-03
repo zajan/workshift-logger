@@ -2,12 +2,13 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.ActiveShiftFragment">
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/active_shift_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -60,20 +61,22 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:minWidth="24dp"
             android:text="-"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView4"
             tools:text="-" />
 
+
         <TextView
             android:id="@+id/textView16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tv_project_name"
-            app:layout_constraintStart_toEndOf="@+id/tv_project_name"
-            tools:text="for" />
+            android:text="for"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_project_name"
+            app:layout_constraintStart_toEndOf="@+id/tv_project_name" />
 
         <TextView
             android:id="@+id/tv_client_name"
@@ -95,18 +98,53 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_project_name"
             tools:text="Pause" />
-
-        <TextView
+        <android.support.design.widget.TextInputLayout
             android:id="@+id/tv_pause"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="- min"
-            android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView18"
-            tools:text="- min" />
+            app:layout_constraintTop_toBottomOf="@+id/textView18">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/et_pause"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:inputType="numberDecimal"
+                android:textSize="18sp" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <TextView
+            android:id="@+id/tv_pause_min"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="min"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_pause"
+            app:layout_constraintStart_toEndOf="@+id/tv_pause" />
+
+        <ImageView
+            android:id="@+id/btn_edit_start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_start_time"
+            app:layout_constraintStart_toEndOf="@+id/tv_start_time"
+            app:srcCompat="@drawable/ic_edit_grey_24dp" />
+
+        <ImageView
+            android:id="@+id/btn_edit_project"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_client_name"
+            app:layout_constraintStart_toEndOf="@+id/tv_client_name"
+            app:srcCompat="@drawable/ic_edit_grey_24dp" />
+
     </android.support.constraint.ConstraintLayout>
 
 
@@ -123,12 +161,10 @@
         android:textSize="36sp"
         android:textStyle="italic"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/btn_start_stop"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.002" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btn_start_stop"

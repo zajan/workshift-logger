@@ -16,7 +16,7 @@ import java.util.List;
 
 public class FactorsRecyclerViewAdapter extends RecyclerView.Adapter<FactorsRecyclerViewAdapter.FactorsViewHolder> {
 
-    public interface OnFactorClickListener{
+    public interface OnFactorClickListener {
         void onDeleteClick(Factor factor);
     }
 
@@ -25,7 +25,7 @@ public class FactorsRecyclerViewAdapter extends RecyclerView.Adapter<FactorsRecy
 
     public FactorsRecyclerViewAdapter(List<Factor> factors, OnFactorClickListener onFactorClickListener) {
         this.factors = factors;
-        if(onFactorClickListener == null){
+        if (onFactorClickListener == null) {
             throw new IllegalArgumentException("Must implement FactorsRecyclerViewAdapter.OnFactorClickListener interface.");
         }
         this.onFactorClickListener = onFactorClickListener;

@@ -18,8 +18,8 @@ import com.ajna.workshiftlogger.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ajna.workshiftlogger.fragments.ActiveShiftFragment.SHARED_PREFS_CLIENT_ID;
 import static com.ajna.workshiftlogger.fragments.ActiveShiftFragment.SHARED_PREFS_CLIENT_NAME;
+import static com.ajna.workshiftlogger.fragments.ActiveShiftFragment.SHARED_PREFS_PROJECT_ID;
 import static com.ajna.workshiftlogger.fragments.ActiveShiftFragment.SHARED_PREFS_PROJECT_NAME;
 
 /**
@@ -93,11 +93,11 @@ public class ShiftsFragment extends Fragment{
         mListener = null;
     }
 
-    public void updateCurrentProject(String projectName, long clientId, String clientName){
+    public void updateCurrentProject(String projectName, long projectId, String clientName){
         SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString(SHARED_PREFS_PROJECT_NAME, projectName);
-        editor.putLong(SHARED_PREFS_CLIENT_ID, clientId);
+        editor.putLong(SHARED_PREFS_PROJECT_ID, projectId);
         editor.putString(SHARED_PREFS_CLIENT_NAME, clientName);
         editor.apply();
 

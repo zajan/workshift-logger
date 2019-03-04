@@ -252,13 +252,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onProjectPicked(String name, long clientId, String clientName) {
+    public void onProjectPicked(long projectId, String name, String clientName) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.popBackStack();
 
         ShiftsFragment fragment = (ShiftsFragment) fragmentManager.findFragmentByTag(ShiftsFragment.class.getSimpleName());
         if(fragment != null){
-            fragment.updateCurrentProject(name, clientId, clientName);
+            fragment.updateCurrentProject(name, projectId, clientName);
         }
     }
 

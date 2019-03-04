@@ -44,7 +44,7 @@ public class ActiveShiftFragment extends Fragment {
     private boolean isShiftStarted = false;
     public static final String SHARED_PREFS_START_TIME = "SharedPrefsStartTime";
     public static final String SHARED_PREFS_PROJECT_NAME = "SharedPrefsProjectName";
-    public static final String SHARED_PREFS_CLIENT_ID = "ClientId";
+    public static final String SHARED_PREFS_PROJECT_ID = "ProjectId";
     public static final String SHARED_PREFS_CLIENT_NAME = "SharedPrefsClientName";
     public static final String SHARED_PREFS_PAUSE = "SharedPrefsPause";
 
@@ -147,6 +147,7 @@ public class ActiveShiftFragment extends Fragment {
         editor.putLong(SHARED_PREFS_START_TIME, 0);
         editor.putString(SHARED_PREFS_PROJECT_NAME, getString(R.string.default_empty_text_value));
         editor.putString(SHARED_PREFS_CLIENT_NAME, getString(R.string.default_empty_text_value));
+        editor.putLong(SHARED_PREFS_PROJECT_ID, 0);
         editor.putLong(SHARED_PREFS_PAUSE, 0);
 
         editor.apply();

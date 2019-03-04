@@ -114,11 +114,11 @@ public class ProjectsListFragment extends ListFragment
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
                 String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
-                long clientId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_ID));
+                long projectId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.Columns._ID));
                 String clientName = cursor.getString(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_NAME));
 
                 if(mode == ProjectListShowOrPick.PICK){
-                    mListener.onProjectPicked(projectName, clientId, clientName);
+                    mListener.onProjectPicked(projectId, projectName, clientName);
                 } else {
                     mListener.onProjectClicked(projectName);
                 }
@@ -183,11 +183,11 @@ public class ProjectsListFragment extends ListFragment
         void onProjectClicked(String name);
         /**
          * method called when project is clicked in ProjectsListShowOrPick.PICK mode
+         * @param projectId id of the picked project
          * @param projectName name of the picked project
-         * @param clientId id of client related to picked project
          * @param clientName name of client related to picked project
          */
-        void onProjectPicked(String projectName, long clientId, String clientName);
+        void onProjectPicked(long projectId, String projectName, String clientName);
 
         /**
          * method called after new project button is clicked

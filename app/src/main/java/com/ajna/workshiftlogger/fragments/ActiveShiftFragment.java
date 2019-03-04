@@ -44,6 +44,7 @@ public class ActiveShiftFragment extends Fragment {
     private boolean isShiftStarted = false;
     public static final String SHARED_PREFS_START_TIME = "SharedPrefsStartTime";
     public static final String SHARED_PREFS_PROJECT_NAME = "SharedPrefsProjectName";
+    public static final String SHARED_PREFS_CLIENT_ID = "ClientId";
     public static final String SHARED_PREFS_CLIENT_NAME = "SharedPrefsClientName";
     public static final String SHARED_PREFS_PAUSE = "SharedPrefsPause";
 

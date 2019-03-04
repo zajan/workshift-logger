@@ -40,12 +40,6 @@ public class ProjectsListFragment extends ListFragment
     public enum ProjectListShowOrPick {SHOW, PICK}
     private ProjectListShowOrPick mode;
 
-    static final String[] PROJECTION = new String[] {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
-            ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME};
-
-    static final String SELECTION = "((" +
-            ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " NOTNULL) AND (" +
-            ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " != '' ))";
     private static final String MODE_SHOW_OR_PICK = "modeShowOrPick";
 
         SimpleCursorAdapter cursorAdapter;
@@ -120,8 +114,11 @@ public class ProjectsListFragment extends ListFragment
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
                 String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
+                long clientId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_ID));
+                String clientName = cursor.getString(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_NAME));
+
                 if(mode == ProjectListShowOrPick.PICK){
-                    mListener.onProjectPicked(projectName);
+                    mListener.onProjectPicked(projectName, clientId, clientName);
                 } else {
                     mListener.onProjectClicked(projectName);
                 }
@@ -150,6 +147,15 @@ public class ProjectsListFragment extends ListFragment
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+        String[] PROJECTION = new String[] {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
+                ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME,
+                ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID + " AS " + ProjectsContract.FullInfoColumns.CLIENT_ID,
+                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " AS " + ProjectsContract.FullInfoColumns.CLIENT_NAME};
+
+        String SELECTION = "((" +
+                ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " NOTNULL) AND (" +
+                ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " != '' ))";
+
         return new CursorLoader(getContext(), ProjectsContract.CONTENT_URI,
                 PROJECTION, SELECTION, null, null);    }
 
@@ -177,9 +183,11 @@ public class ProjectsListFragment extends ListFragment
         void onProjectClicked(String name);
         /**
          * method called when project is clicked in ProjectsListShowOrPick.PICK mode
-         * @param name name of the picked project
+         * @param projectName name of the picked project
+         * @param clientId id of client related to picked project
+         * @param clientName name of client related to picked project
          */
-        void onProjectPicked(String name);
+        void onProjectPicked(String projectName, long clientId, String clientName);
 
         /**
          * method called after new project button is clicked

@@ -1,10 +1,7 @@
 package com.ajna.workshiftlogger.fragments;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,23 +11,16 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.database.ClientsContract;
 import com.ajna.workshiftlogger.database.ProjectsContract;
-import com.ajna.workshiftlogger.model.Factor;
-
-import java.util.Collections;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,12 +33,20 @@ import java.util.Collections;
 public class ProjectsListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    /**
+     * use SHOW value when open this fragment to display and/or edit client records
+     * use PICK value when open this fragment to pick one client record for project
+     */
+    public enum ProjectListShowOrPick {SHOW, PICK}
+    private ProjectListShowOrPick mode;
+
     static final String[] PROJECTION = new String[] {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
             ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME};
 
     static final String SELECTION = "((" +
             ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " NOTNULL) AND (" +
             ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " != '' ))";
+    private static final String MODE_SHOW_OR_PICK = "modeShowOrPick";
 
         SimpleCursorAdapter cursorAdapter;
 
@@ -64,13 +62,22 @@ public class ProjectsListFragment extends ListFragment
      *
      * @return A new instance of fragment ProjectsListFragment.
      */
-    public static ProjectsListFragment newInstance() {
-        return new ProjectsListFragment();
+    public static ProjectsListFragment newInstance(ProjectListShowOrPick mode) {
+        ProjectsListFragment fragment = new ProjectsListFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(MODE_SHOW_OR_PICK, mode);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            mode = (ProjectsListFragment.ProjectListShowOrPick) args.getSerializable(MODE_SHOW_OR_PICK);
+        }
 
         String[] fromColumns = {ClientsContract.Columns.NAME};
         int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
@@ -113,7 +120,11 @@ public class ProjectsListFragment extends ListFragment
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
                 String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
-                mListener.onProjectClicked(projectName);
+                if(mode == ProjectListShowOrPick.PICK){
+                    mListener.onProjectPicked(projectName);
+                } else {
+                    mListener.onProjectClicked(projectName);
+                }
 
             }
         });
@@ -159,7 +170,20 @@ public class ProjectsListFragment extends ListFragment
      * activity.
      */
     public interface OnFragmentInteractionListener {
+        /**
+         * method called when project is clicked in ProjectsListShowOrPick.SHOW mode
+         * @param name name of the picked project
+         */
         void onProjectClicked(String name);
+        /**
+         * method called when project is clicked in ProjectsListShowOrPick.PICK mode
+         * @param name name of the picked project
+         */
+        void onProjectPicked(String name);
+
+        /**
+         * method called after new project button is clicked
+         */
         void onNewProjectClicked();
     }
 }

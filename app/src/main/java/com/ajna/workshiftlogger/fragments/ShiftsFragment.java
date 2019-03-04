@@ -1,12 +1,14 @@
 package com.ajna.workshiftlogger.fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,8 @@ import com.ajna.workshiftlogger.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ajna.workshiftlogger.fragments.ActiveShiftFragment.SHARED_PREFS_PROJECT_NAME;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,16 +29,11 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class ShiftsFragment extends Fragment{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String TAG = "ShiftsFragment";
 
     private OnFragmentInteractionListener mListener;
+
+    private MyFragmentPagerAdapter adapter;
 
     public ShiftsFragment() {
         // Required empty public constructor
@@ -64,7 +63,7 @@ public class ShiftsFragment extends Fragment{
         View view = inflater.inflate(R.layout.fragment_shifts, container, false);
         // Setting ViewPager for each Tabs
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        MyFragmentPagerAdapter adapter = new MyFragmentPagerAdapter(getChildFragmentManager());
+        adapter = new MyFragmentPagerAdapter(getChildFragmentManager());
         adapter.addFragment(ActiveShiftFragment.newInstance(), "Active shift");
         adapter.addFragment(ShiftsListFragment.newInstance(), "Finished");
 
@@ -91,6 +90,15 @@ public class ShiftsFragment extends Fragment{
         super.onDetach();
         mListener = null;
     }
+
+    public void updateCurrentProject(String name){
+        SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(SHARED_PREFS_PROJECT_NAME, name);
+        editor.apply();
+
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

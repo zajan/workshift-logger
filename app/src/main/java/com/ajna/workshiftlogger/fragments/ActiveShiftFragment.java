@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -40,7 +42,6 @@ public class ActiveShiftFragment extends Fragment {
     private static final String TAG = "ActiveShiftFragment";
 
     private boolean isShiftStarted = false;
-    //    public static final String SHARED_PREFS_IS_SHIFT_STARTED = "IsShiftStarted";
     public static final String SHARED_PREFS_START_TIME = "SharedPrefsStartTime";
     public static final String SHARED_PREFS_PROJECT_NAME = "SharedPrefsProjectName";
     public static final String SHARED_PREFS_CLIENT_NAME = "SharedPrefsClientName";
@@ -108,6 +109,13 @@ public class ActiveShiftFragment extends Fragment {
             }
         });
 
+        btnEditProject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.onSelectProjectClicked();
+            }
+        });
+
         return view;
     }
 
@@ -144,6 +152,7 @@ public class ActiveShiftFragment extends Fragment {
     }
 
     private boolean addShiftToDB() {
+        Log.d(TAG, "addShiftToDB: starts");
         Date date = Calendar.getInstance().getTime();
         long currentTime = date.getTime();
 
@@ -153,7 +162,7 @@ public class ActiveShiftFragment extends Fragment {
 
         values.put(ShiftsContract.Columns.START_TIME, currentStartTimeInMillis);
         values.put(ShiftsContract.Columns.END_TIME, currentTime);
-        // TODO get ProjectId from ProjectName, hardcoded for init tests
+        // TODO get ProjectId from ProjectName (hardcoded for init tests)
         values.put(ShiftsContract.Columns.PROJECT_ID, 2);
 
 
@@ -161,12 +170,6 @@ public class ActiveShiftFragment extends Fragment {
         long id = ShiftsContract.getId(uri);
 
         return (id > 0);
-    }
-
-    private void updateDate(Date date) {
-        DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getContext());
-        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
-        tvStartTime.setText(String.format("%s %s", timeFormat.format(date), dateFormat.format(date)));
     }
 
     private void updateDate(long dateInMillis) {
@@ -221,11 +224,8 @@ public class ActiveShiftFragment extends Fragment {
         Log.d(TAG, "onStart: starts. isShiftStarted = " + isShiftStarted);
         super.onStart();
 
-        if (readValuesFromSharedPrefs()) {
-            switchLayout(true);
-        } else {
-            switchLayout(false);
-        }
+        isShiftStarted = readValuesFromSharedPrefs();
+        switchLayout(isShiftStarted);
     }
 
     @Override
@@ -310,6 +310,6 @@ public class ActiveShiftFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-
+        void onSelectProjectClicked();
     }
 }

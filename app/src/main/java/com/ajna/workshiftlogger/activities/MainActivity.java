@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             resolveUpButtonWithFragmentStack();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_main, ShiftsFragment.newInstance())
+                    .replace(R.id.fragment_main, ShiftsFragment.newInstance(), ShiftsFragment.class.getSimpleName())
                     .commit();
             navigationView.setCheckedItem(R.id.nav_shifts);
         }
@@ -115,12 +115,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_shifts:
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_main, ShiftsFragment.newInstance(),
-                                ActiveShiftFragment.class.getSimpleName())
+                                ShiftsFragment.class.getSimpleName())
                         .commit();
                 break;
             case R.id.nav_projects:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance(),
+                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.SHOW),
                                 ProjectsListFragment.class.getSimpleName())
                         .commit();
                 break;
@@ -252,6 +252,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public void onProjectPicked(String name) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.popBackStack();
+
+        ShiftsFragment fragment = (ShiftsFragment) fragmentManager.findFragmentByTag(ShiftsFragment.class.getSimpleName());
+        if(fragment != null){
+            fragment.updateCurrentProject(name);
+        }
+    }
+
+    @Override
     public void onNewProjectClicked() {
         onProjectClicked(null);
     }
@@ -278,5 +289,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onSelectProjectClicked() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.PICK),
+                        ProjectsListFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
     }
 }

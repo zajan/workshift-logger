@@ -4,6 +4,8 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import com.ajna.workshiftlogger.model.Shift;
+
 import static com.ajna.workshiftlogger.database.MyContentProvider.CONTENT_AUTHORITY;
 import static com.ajna.workshiftlogger.database.MyContentProvider.CONTENT_AUTHORITY_URI;
 
@@ -14,6 +16,17 @@ public class ProjectsContract {
         public static final String _ID = BaseColumns._ID;
         public static final String NAME = "Name";
         public static final String CLIENT_ID = "ClientId";
+    }
+
+    /**
+     * Class providing unique column names in query with JOIN statements,
+     * as some of column names may be the same in different tables.
+     */
+    public static class FullInfoColumns {
+        public static final String _ID = BaseColumns._ID;
+        public static final String PROJECT_NAME = "ProjectName";
+        public static final String CLIENT_ID = "ClientId";
+        public static final String CLIENT_NAME = "ClientName";
     }
 
     public static final Uri CONTENT_URI = Uri.withAppendedPath(CONTENT_AUTHORITY_URI, TABLE_NAME);

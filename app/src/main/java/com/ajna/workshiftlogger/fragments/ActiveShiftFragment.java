@@ -157,6 +157,13 @@ public class ActiveShiftFragment extends Fragment {
         Log.d(TAG, "addShiftToDB: starts");
         Date date = Calendar.getInstance().getTime();
         long currentTime = date.getTime();
+        long projectId = 0;
+
+        String projectName = tvProjectName.getText().toString().trim();
+        if(!(projectName.isEmpty()) | (!projectName.equals(getString(R.string.default_empty_text_value)))){
+            SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+            projectId = sharedPrefs.getLong(SHARED_PREFS_PROJECT_ID, 0);
+        }
 
 
         ContentResolver contentResolver = getActivity().getContentResolver();
@@ -164,8 +171,7 @@ public class ActiveShiftFragment extends Fragment {
 
         values.put(ShiftsContract.Columns.START_TIME, currentStartTimeInMillis);
         values.put(ShiftsContract.Columns.END_TIME, currentTime);
-        // TODO get ProjectId from ProjectName (hardcoded for init tests)
-        values.put(ShiftsContract.Columns.PROJECT_ID, 2);
+        values.put(ShiftsContract.Columns.PROJECT_ID, projectId);
 
 
         Uri uri = contentResolver.insert(ShiftsContract.CONTENT_URI, values);

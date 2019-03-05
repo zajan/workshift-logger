@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Shift implements Serializable {
+    private static final String TAG = "Shift";
+
     public static final long serialVersionUID = 20190215L;
 
     private long _id;
@@ -121,5 +123,34 @@ public class Shift implements Serializable {
 
     public long calculateDuration(){
         return endTime - startTime - pause;
+    }
+
+    public double calculatePayment(){
+        // TODO calculate also with rounding to minutes or half an hour depending on the settings
+        long workHours = calculateDuration() / 3600000;
+        double factorValue = 1;
+        int factorHour = (int) workHours;
+
+        if(factors != null && factors.size() > 0){
+            for(int i =0; i<factors.size(); i++){
+                Factor factor = factors.get(i);
+
+                if(factor.getHours() < workHours){
+                    factorValue = ((double)factor.getFactorInPercent()) / 100;
+                    factorHour = factor.getHours();
+                } else if(factor.getHours() >= workHours){
+                    break;
+                }
+            }
+        }
+
+        if(paymentType == 0){
+            // flat payment - default
+            return basePayment * factorValue;
+        } else {
+            // payment per hour
+            long overhours = workHours - factorHour;
+            return (factorHour * basePayment) + (overhours * basePayment * factorValue);
+        }
     }
 }

@@ -117,7 +117,7 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
                 FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.START_HOUR};
         String selection = null;
         String[] selectionArgs = null;
-        String sortOrder = null;
+        String sortOrder = ShiftsContract.Columns.START_TIME + " DESC";
 
         return new CursorLoader(getContext(), ShiftsContract.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
     }

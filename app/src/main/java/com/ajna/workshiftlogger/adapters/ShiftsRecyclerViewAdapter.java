@@ -15,15 +15,20 @@ import com.ajna.workshiftlogger.database.ClientsContract;
 import com.ajna.workshiftlogger.database.ShiftsContract;
 import com.ajna.workshiftlogger.model.Shift;
 
+import java.util.Locale;
+
+
 public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecyclerViewAdapter.ShiftsViewHolder> {
     private static final String TAG = "ShiftsRecyclerViewAdapt";
 
     private Cursor cursor;
-    private final java.text.DateFormat mDateFormat; // module level so we don't keep instantiating in bindView.
+    private final java.text.DateFormat dateFormat; // module level so we don't keep instantiating in bindView.
+    private final java.text.DateFormat timeFormat;
 
     public ShiftsRecyclerViewAdapter(Context context, Cursor cursor) {
         this.cursor = cursor;
-        mDateFormat = android.text.format.DateFormat.getDateFormat(context);
+        dateFormat = android.text.format.DateFormat.getDateFormat(context);
+        timeFormat = android.text.format.DateFormat.getTimeFormat(context);
     }
 
     @NonNull
@@ -45,11 +50,11 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
 
         long startTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.START_TIME));
         long endTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME));
-
         String clientName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_NAME));
         String projectName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME));
-
         int basePayment = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT));
+        int payType = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE));
+
         Log.d(TAG, "onBindViewHolder: clientName: " + clientName);
         Log.d(TAG, "onBindViewHolder: projectName: " + projectName);
 
@@ -58,12 +63,17 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
         shift.setBasePayment(basePayment);
         shift.setStartTime(startTimeDate);
         shift.setEndTime(endTimeDate);
+        shift.setPaymentType(payType);
 
         long duration = shift.calculateDuration();
+        long durationHours = duration / 3600000;
+        long durationMins = (duration % 3600000) / 60000;
+        holder.tvDate.setText(dateFormat.format(shift.getStartTime()));
+        holder.tvTime.setText(String.format("%s - %s", timeFormat.format(shift.getStartTime()), timeFormat.format(shift.getEndTime())));
         holder.tvProjectName.setText(projectName);
         holder.tvClientName.setText(clientName);
-        holder.tvDuration.setText(String.valueOf(duration));
-
+        holder.tvDuration.setText(String.format("%.2sh %smin", String.valueOf(durationHours), String.valueOf(durationMins)));
+        holder.tvPayment.setText(String.format(Locale.US, "%.2f EUR", shift.calculatePayment()));
 
     }
 

@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -75,6 +76,8 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
         if(shiftsRVAdapter == null) {
             shiftsRVAdapter = new ShiftsRecyclerViewAdapter(getContext(), null);
         }
+        rvShifts.addItemDecoration(new DividerItemDecoration(rvShifts.getContext(), DividerItemDecoration.VERTICAL));
+
         rvShifts.setAdapter(shiftsRVAdapter);
 
         return view;

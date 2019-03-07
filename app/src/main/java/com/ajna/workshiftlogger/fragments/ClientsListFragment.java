@@ -40,6 +40,8 @@ public class ClientsListFragment extends ListFragment
      */
     public enum ClientListShowOrPick {SHOW, PICK}
 
+    public static final int LOADER_CLIENTS = 1;
+
     static final String[] PROJECTION = new String[] {ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
             ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME};
 
@@ -97,7 +99,7 @@ public class ClientsListFragment extends ListFragment
 
         // Prepare the loader. Either re-connect with an existing one,
         // or start a new one.
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(LOADER_CLIENTS, null, this);
     }
 
     @Override

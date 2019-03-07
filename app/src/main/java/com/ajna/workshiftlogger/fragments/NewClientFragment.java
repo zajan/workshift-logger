@@ -48,7 +48,8 @@ import java.util.List;
 public class NewClientFragment extends Fragment implements FactorsRecyclerViewAdapter.OnFactorClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "NewClientFragment";
-    public static final int LOADER_ID = 1;
+    public static final int LOADER_CLIENTS = 1;
+    public static final int LOADER_FACTORS = 2;
 
 
     public enum NewClientFragmentMode {ADD, EDIT}
@@ -117,7 +118,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         rvFactors = view.findViewById(R.id.rv_factors);
 
         if (mode == NewClientFragmentMode.EDIT) {
-            getLoaderManager().initLoader(LOADER_ID, null, this);
+            getLoaderManager().initLoader(LOADER_CLIENTS, null, this);
         }
 
         if (factors == null) {
@@ -194,6 +195,27 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
 
         this.factors.clear();
         this.factors.addAll(factors);
+        factorsRVAdapter.notifyDataSetChanged();
+    }
+
+
+    private void initializeClient(Client client) {
+        etName.setText(client.getName());
+        etOfficialName.setText(client.getOfficialName());
+        etAddress.setText(client.getAddress());
+        etBasePayment.setText(Integer.toString(client.getBasicPayment()));
+        radioGroup.clearCheck();
+        if (client.getPaymentType() == 0) {
+            radioGroup.check(R.id.radio_flat_rate);
+        } else {
+            radioGroup.check(R.id.radio_per_h);
+        }
+    }
+    private void initializeFactors(List<Factor> factors){
+        Log.d(TAG, "initializeFactors: factors.size = " + factors.size());
+        this.factors.clear();
+        this.factors.addAll(factors);
+        factorsRVAdapter.notifyDataSetChanged();
     }
 
     public boolean saveClient() {
@@ -220,7 +242,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         Client client = new Client(name, officialName, address, paymentType, payment);
         long clientId = addClientToDB(client);
 
-        if(clientId < 0){
+        if (clientId < 0) {
             return false;
         }
 
@@ -241,7 +263,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             etName.setError(getString(R.string.field_cannot_be_empty));
             return false;
         }
-        if(name.equals(getString(R.string.select_client))){
+        if (name.equals(getString(R.string.select_client))) {
             etName.setError("Name not allowed");
             return false;
         }
@@ -331,44 +353,76 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        String[] PROJECTION = {ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
-                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME,
-                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.OFFICIAL_NAME,
-                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.ADDRESS,
-                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.PAY_TYPE,
-                ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.BASE_PAYMENT,
-                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID,
-                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.START_HOUR,
-                FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.VALUE
-        };
 
-        String SELECTION = ClientsContract.Columns.NAME + " = ? ";
-        String SELECTION_ARGS[] = {initClientName};
+        String[] PROJECTION;
+        String SELECTION;
+        String[] SELECTION_ARGS;
+        String SORTORDER;
+        switch (id) {
+            case LOADER_CLIENTS:
+                PROJECTION = new String[]{ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID,
+                        ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME,
+                        ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.OFFICIAL_NAME,
+                        ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.ADDRESS,
+                        ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.PAY_TYPE,
+                        ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.BASE_PAYMENT
+                };
 
-        return new CursorLoader(getContext(), ClientsContract.CONTENT_URI, PROJECTION, SELECTION, SELECTION_ARGS, null);
+                SELECTION = ClientsContract.Columns.NAME + " = ? ";
+                SELECTION_ARGS = new String[]{initClientName};
+
+                return new CursorLoader(getContext(), ClientsContract.CONTENT_URI, PROJECTION, SELECTION, SELECTION_ARGS, null);
+
+            case LOADER_FACTORS:
+                Log.d(TAG, "onCreateLoader: LOADER_FACTORS starts");
+                PROJECTION = new String[]{FactorsContract.Columns.START_HOUR,
+                        FactorsContract.Columns.VALUE};
+                SELECTION = FactorsContract.Columns.CLIENT_ID + " = ? ";
+                SELECTION_ARGS = new String[]{String.valueOf(initClientId)};
+                SORTORDER = FactorsContract.Columns.START_HOUR;
+
+                return new CursorLoader(getContext(), FactorsContract.CONTENT_URI, PROJECTION, SELECTION, SELECTION_ARGS, SORTORDER);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
         Log.d(TAG, "onLoadFinished: starts");
-        cursor.moveToFirst();
 
-        initClientId = cursor.getLong(cursor.getColumnIndex(ClientsContract.Columns._ID));
-        Client client = new Client(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME)),
-                cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.OFFICIAL_NAME)),
-                cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.ADDRESS)),
-                cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)),
-                cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
-        factors.clear();
-        do {
-            List<Factor> factors = new ArrayList<>();
-            Factor factor = new Factor(cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)),
-                    cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.VALUE)));
-            factors.add(factor);
-        } while (cursor.moveToNext());
-        factorsRVAdapter.notifyDataSetChanged();
+        switch (loader.getId()) {
+            case LOADER_CLIENTS:
+                cursor.moveToFirst();
+                initClientId = cursor.getLong(cursor.getColumnIndex(ClientsContract.Columns._ID));
+                Client client = new Client(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME)),
+                        cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.OFFICIAL_NAME)),
+                        cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.ADDRESS)),
+                        cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)),
+                        cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
 
-        initializeValues(client, factors);
+                initializeClient(client);
+
+                getLoaderManager().initLoader(LOADER_FACTORS, null, this);
+                break;
+
+            case LOADER_FACTORS:
+                Log.d(TAG, "onLoadFinished: LOADER_FACTORS cursorCount = " + cursor.getCount());
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    List<Factor> factors = new ArrayList<>();
+                    do {
+                        Log.d(TAG, "onLoadFinished: factor loaded --------------");
+                        Factor factor = new Factor(cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.START_HOUR)),
+                                cursor.getInt(cursor.getColumnIndex(FactorsContract.Columns.VALUE)));
+                        Log.d(TAG, "onLoadFinished: hour: " + factor.getHours());
+                        Log.d(TAG, "onLoadFinished: value: " + factor.getFactorInPercent());
+                        factors.add(factor);
+                    } while (cursor.moveToNext());
+                    initializeFactors(factors);
+                }
+        }
+
     }
 
     @Override

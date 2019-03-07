@@ -132,38 +132,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         btnAddFactor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                LayoutInflater dialogInflater = getActivity().getLayoutInflater();
-                final View dialogView = dialogInflater.inflate(R.layout.dialog_add_factor, null);
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Add factor")
-                        .setView(dialogView)
-                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                EditText etHours = dialogView.findViewById(R.id.et_hours);
-                                EditText etFactor = dialogView.findViewById(R.id.et_factor);
-                                int hours = Integer.parseInt(etHours.getText().toString());
-                                int factor = Integer.parseInt(etFactor.getText().toString());
-                                factors.add(new Factor(hours, factor));
-                                Collections.sort(factors);
-                                factorsRVAdapter.notifyDataSetChanged();
-
-                                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if (inputManager != null) {
-                                    inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                }
-                            }
-                        })
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if (inputManager != null) {
-                                    inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                }
-                            }
-                        });
-                builder.create().show();
+                showNewFactorDialog(view);
             }
         });
 
@@ -180,22 +149,39 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return view;
     }
 
-    private void initializeValues(Client client, List<Factor> factors) {
-        Log.d(TAG, "initializeValues: starts");
-        etName.setText(client.getName());
-        etOfficialName.setText(client.getOfficialName());
-        etAddress.setText(client.getAddress());
-        etBasePayment.setText(Integer.toString(client.getBasicPayment()));
-        radioGroup.clearCheck();
-        if (client.getPaymentType() == 0) {
-            radioGroup.check(R.id.radio_flat_rate);
-        } else {
-            radioGroup.check(R.id.radio_per_h);
-        }
+    private void showNewFactorDialog(final View view){
+        LayoutInflater dialogInflater = getActivity().getLayoutInflater();
+        final View dialogView = dialogInflater.inflate(R.layout.dialog_add_factor, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Add factor")
+                .setView(dialogView)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        EditText etHours = dialogView.findViewById(R.id.et_hours);
+                        EditText etFactor = dialogView.findViewById(R.id.et_factor);
+                        int hours = Integer.parseInt(etHours.getText().toString());
+                        int factor = Integer.parseInt(etFactor.getText().toString());
+                        factors.add(new Factor(hours, factor));
+                        Collections.sort(factors);
+                        factorsRVAdapter.notifyDataSetChanged();
 
-        this.factors.clear();
-        this.factors.addAll(factors);
-        factorsRVAdapter.notifyDataSetChanged();
+                        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (inputManager != null) {
+                            inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (inputManager != null) {
+                            inputManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
+                    }
+                });
+        builder.create().show();
     }
 
 
@@ -219,10 +205,27 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
     }
 
     public boolean saveClient() {
+
         if (!validateInput()) {
             return false;
         }
 
+        Client client = getClientFromInput();
+
+        long clientId = saveClientInDB(client);
+
+        if (clientId < 0) {
+            return false;
+        }
+
+        if ((factors != null) && factors.size() > 0) {
+            saveFactorsInDB(clientId);
+        }
+
+        return true;
+    }
+
+    private Client getClientFromInput(){
         String name = etName.getText().toString().trim();
         String paymentText = etBasePayment.getText().toString().trim();
         int payment = Integer.parseInt(paymentText);
@@ -238,19 +241,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             throw new IllegalArgumentException("No radio button selected");
         }
 
-
-        Client client = new Client(name, officialName, address, paymentType, payment);
-        long clientId = addClientToDB(client);
-
-        if (clientId < 0) {
-            return false;
-        }
-
-        if ((factors != null) && factors.size() > 0) {
-            addFactorsToDB(clientId);
-        }
-
-        return true;
+        return new Client(name, officialName, address, paymentType, payment);
     }
 
     private boolean validateInput() {
@@ -287,7 +278,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return true;
     }
 
-    private long addClientToDB(Client client) {
+    private long saveClientInDB(Client client) {
         ContentResolver contentResolver = getActivity().getContentResolver();
         ContentValues values = new ContentValues();
 
@@ -312,7 +303,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         }
     }
 
-    private void addFactorsToDB(long clientId) {
+    private void saveFactorsInDB(long clientId) {
         ContentResolver contentResolver = getActivity().getContentResolver();
         ContentValues values = new ContentValues();
 

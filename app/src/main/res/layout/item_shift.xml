@@ -27,16 +27,19 @@
             tools:text="BTL Rigging" />
 
         <TextView
+            android:id="@+id/tv_report_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            tools:text="Pause: 20 min" />
+
+        <TextView
             android:id="@+id/tv_report_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="3h" />
+            android:textStyle="bold"
+            tools:text="2h 20min" />
 
-        <TextView
-            android:id="@+id/tv_report_payment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="125 EUR" />
     </TableRow>
 
     <TableRow
@@ -56,6 +59,12 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             tools:text="Projekt 1234" />
+
+        <TextView
+            android:id="@+id/tv_report_payment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
     </TableRow>
 
 </TableLayout>

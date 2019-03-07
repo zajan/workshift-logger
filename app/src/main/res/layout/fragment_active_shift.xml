@@ -99,7 +99,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_project_name"
             tools:text="Pause" />
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/tv_pause"
+            android:id="@+id/tv_report_pause"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -108,7 +108,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView18">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/et_pause"
+                android:id="@+id/et_report_pause"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
@@ -124,8 +124,8 @@
             android:layout_marginStart="8dp"
             android:text="min"
             android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_pause"
-            app:layout_constraintStart_toEndOf="@+id/tv_pause" />
+            app:layout_constraintBottom_toBottomOf="@+id/tv_report_pause"
+            app:layout_constraintStart_toEndOf="@+id/tv_report_pause" />
 
         <ImageView
             android:id="@+id/btn_edit_start_time"

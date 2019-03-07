@@ -1,15 +1,11 @@
 package com.ajna.workshiftlogger.fragments;
 
-import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -21,8 +17,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.TimePicker;
-
 
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.database.ShiftsContract;
@@ -174,6 +168,14 @@ public class ActiveShiftFragment extends Fragment {
             projectId = sharedPrefs.getLong(SHARED_PREFS_PROJECT_ID, 0);
         }
 
+        String pauseText = etPause.getText().toString().trim();
+        int pause;
+
+        try{
+            pause = Integer.valueOf(pauseText);
+        } catch (NumberFormatException e){
+            pause = 0;
+        }
 
         ContentResolver contentResolver = getActivity().getContentResolver();
         ContentValues values = new ContentValues();
@@ -181,6 +183,7 @@ public class ActiveShiftFragment extends Fragment {
         values.put(ShiftsContract.Columns.START_TIME, currentStartTimeInMillis);
         values.put(ShiftsContract.Columns.END_TIME, currentTime);
         values.put(ShiftsContract.Columns.PROJECT_ID, projectId);
+        values.put(ShiftsContract.Columns.PAUSE, pause);
 
 
         Uri uri = contentResolver.insert(ShiftsContract.CONTENT_URI, values);

@@ -149,7 +149,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return view;
     }
 
-    private void showNewFactorDialog(final View view){
+    private void showNewFactorDialog(final View view) {
         LayoutInflater dialogInflater = getActivity().getLayoutInflater();
         final View dialogView = dialogInflater.inflate(R.layout.dialog_add_factor, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -197,7 +197,8 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             radioGroup.check(R.id.radio_per_h);
         }
     }
-    private void initializeFactors(List<Factor> factors){
+
+    private void initializeFactors(List<Factor> factors) {
         Log.d(TAG, "initializeFactors: factors.size = " + factors.size());
         this.factors.clear();
         this.factors.addAll(factors);
@@ -225,7 +226,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         return true;
     }
 
-    private Client getClientFromInput(){
+    private Client getClientFromInput() {
         String name = etName.getText().toString().trim();
         String paymentText = etBasePayment.getText().toString().trim();
         int payment = Integer.parseInt(paymentText);
@@ -307,21 +308,22 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         ContentResolver contentResolver = getActivity().getContentResolver();
         ContentValues values = new ContentValues();
 
+        if (mode == NewClientFragmentMode.EDIT) {
+            String WHERE = FactorsContract.Columns.CLIENT_ID + " = ?";
+            String[] ARGS = {String.valueOf(initClientId)};
+            contentResolver.delete(FactorsContract.CONTENT_URI, WHERE, ARGS);
+        }
         for (int i = 0; i < factors.size(); i++) {
             values.put(FactorsContract.Columns.CLIENT_ID, clientId);
             values.put(FactorsContract.Columns.START_HOUR, factors.get(i).getHours());
             values.put(FactorsContract.Columns.VALUE, factors.get(i).getFactorInPercent());
 
-            if (mode == NewClientFragmentMode.EDIT) {
-                String WHERE = FactorsContract.Columns.CLIENT_ID + " = ?";
-                String[] ARGS = {String.valueOf(initClientId)};
-                contentResolver.delete(FactorsContract.CONTENT_URI, WHERE, ARGS);
-            } else {
-                contentResolver.insert(FactorsContract.CONTENT_URI, values);
-            }
-        }
 
+            Uri uri = contentResolver.insert(FactorsContract.CONTENT_URI, values);
+            Log.d(TAG, "saveFactorsInDB: NEW factor: " + FactorsContract.getId(uri));
+        }
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -426,17 +428,17 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
         // TODO
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onSaveClicked();
-    }
+/**
+ * This interface must be implemented by activities that contain this
+ * fragment to allow an interaction in this fragment to be communicated
+ * to the activity and potentially other fragments contained in that
+ * activity.
+ * <p>
+ * See the Android Training lesson <a href=
+ * "http://developer.android.com/training/basics/fragments/communicating.html"
+ * >Communicating with Other Fragments</a> for more information.
+ */
+public interface OnFragmentInteractionListener {
+    void onSaveClicked();
+}
 }

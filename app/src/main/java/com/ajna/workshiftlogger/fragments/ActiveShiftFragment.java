@@ -4,6 +4,7 @@ import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -91,8 +92,9 @@ public class ActiveShiftFragment extends Fragment {
         tvStartTime = view.findViewById(R.id.tv_start_time);
         tvProjectName = view.findViewById(R.id.tv_project_name);
         tvClientName = view.findViewById(R.id.tv_client_name);
+        etPause = view.findViewById(R.id.et_report_pause);
         tvNoActiveShift = view.findViewById(R.id.tv_no_active_shift);
-        etPause = view.findViewById(R.id.et_pause);
+        etPause = view.findViewById(R.id.et_report_pause);
         btnEditStartTime = view.findViewById(R.id.btn_edit_start_time);
         btnEditProject = view.findViewById(R.id.btn_edit_project);
         btnStartStop = view.findViewById(R.id.btn_start_stop);
@@ -135,6 +137,7 @@ public class ActiveShiftFragment extends Fragment {
         showSnackbarMessage(isSaveSuccessful);
 
         resetSharedPrefs();
+        resetInputFields();
 
         isShiftStarted = false;
         switchLayout(false);
@@ -151,6 +154,12 @@ public class ActiveShiftFragment extends Fragment {
         editor.putLong(SHARED_PREFS_PAUSE, 0);
 
         editor.apply();
+    }
+    private void resetInputFields(){
+        tvStartTime.setText(getString(R.string.default_empty_text_value));
+        tvProjectName.setText(getString(R.string.default_empty_text_value));
+        tvClientName.setText(getString(R.string.default_empty_text_value));
+        etPause.setText("");
     }
 
     private boolean addShiftToDB() {

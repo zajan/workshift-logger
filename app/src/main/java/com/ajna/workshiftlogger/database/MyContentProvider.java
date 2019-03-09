@@ -88,7 +88,9 @@ public class MyContentProvider extends ContentProvider {
                         + " = " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
 
                         + " LEFT JOIN " + FactorsContract.TABLE_NAME
-                        + " ON " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID);
+                        + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
+                        + " = " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID
+                );
                 break;
             case SHIFTS_ID:
                 queryBuilder.setTables(ShiftsContract.TABLE_NAME + " INNER JOIN " + ProjectsContract.TABLE_NAME
@@ -100,7 +102,9 @@ public class MyContentProvider extends ContentProvider {
                         + " = " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID
 
                         + " LEFT JOIN " + FactorsContract.TABLE_NAME
-                        + " ON " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID);
+                        + " ON " + ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID
+                        + " = " + FactorsContract.TABLE_NAME + "." + FactorsContract.Columns.CLIENT_ID
+                );
                 long shiftId = ShiftsContract.getId(uri);
                 queryBuilder.appendWhere(ShiftsContract.Columns._ID + " = " + shiftId);
                 break;

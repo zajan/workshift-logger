@@ -1,6 +1,9 @@
 package com.ajna.workshiftlogger.model;
 
+import android.util.Log;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Shift implements Serializable {
@@ -13,6 +16,7 @@ public class Shift implements Serializable {
     private long endTime;
     private long pause;
     private String projectName;
+    private long clientId;
     private String clientName;
     private String clientOfficialName;
     private String clientAddress;
@@ -39,6 +43,18 @@ public class Shift implements Serializable {
 
     public long get_id() {
         return _id;
+    }
+
+    public void set_id(long _id) {
+        this._id = _id;
+    }
+
+    public long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(long clientId) {
+        this.clientId = clientId;
     }
 
     public long getStartTime() {
@@ -118,39 +134,49 @@ public class Shift implements Serializable {
     }
 
     public void setFactors(List<Factor> factors) {
-        this.factors = factors;
+        Log.d(TAG, "setFactors: factors.size() = " + factors.size());
+        this.factors = new ArrayList<>(factors);
     }
-
-    public long calculateDuration(){
-        return endTime - startTime - pause;
-    }
-
-    public double calculatePayment(){
-        // TODO calculate also with rounding to minutes or half an hour depending on the settings
+    public Factor getActualFactorInPercent(){
         long workHours = calculateDuration() / 3600000;
-        double factorValue = 1;
+        int factorValue = 100;
         int factorHour = (int) workHours;
 
+        Log.d(TAG, "calculatePayment: factors.size() = " + factors.size());
         if(factors != null && factors.size() > 0){
             for(int i =0; i<factors.size(); i++){
                 Factor factor = factors.get(i);
 
+                Log.d(TAG, "calculatePayment: factor: h: " + factor.getHours() + " v: " + factor.getFactorInPercent());
                 if(factor.getHours() < workHours){
-                    factorValue = ((double)factor.getFactorInPercent()) / 100;
+                    factorValue = factor.getFactorInPercent();
                     factorHour = factor.getHours();
                 } else if(factor.getHours() >= workHours){
                     break;
                 }
             }
         }
+        return new Factor(factorHour, factorValue);
+    }
+
+    public long calculateDuration(){
+        long pauseMillis = pause * 60000;
+        return endTime - startTime - pauseMillis;
+    }
+
+    public double calculatePayment(){
+        // TODO calculate also with rounding to minutes or half an hour depending on the settings
+        long workHours = calculateDuration() / 3600000;
+
+        Factor factor = getActualFactorInPercent();
 
         if(paymentType == 0){
-            // flat payment - default
-            return basePayment * factorValue;
+            // flat payment
+            return basePayment * factor.getFactorInPercent() /100.0;
         } else {
             // payment per hour
-            long overhours = workHours - factorHour;
-            return (factorHour * basePayment) + (overhours * basePayment * factorValue);
+            long overhours = workHours - factor.getHours();
+            return (factor.getHours() * basePayment) + (overhours * basePayment * factor.getFactorInPercent() / 100.0);
         }
     }
 }

@@ -21,12 +21,17 @@ import java.util.Locale;
 public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecyclerViewAdapter.ShiftsViewHolder> {
     private static final String TAG = "ShiftsRecyclerViewAdapt";
 
+    public interface  OnShiftInteractionListener{
+        void onShiftClicked(Shift shift);
+    }
+    private OnShiftInteractionListener listener;
     private Cursor cursor;
     private final java.text.DateFormat dateFormat; // module level so we don't keep instantiating in bindView.
     private final java.text.DateFormat timeFormat;
 
-    public ShiftsRecyclerViewAdapter(Context context, Cursor cursor) {
+    public ShiftsRecyclerViewAdapter(Context context, Cursor cursor, OnShiftInteractionListener listener) {
         this.cursor = cursor;
+        this.listener = listener;
         dateFormat = android.text.format.DateFormat.getDateFormat(context);
         timeFormat = android.text.format.DateFormat.getTimeFormat(context);
     }
@@ -36,7 +41,26 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
     public ShiftsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shift, parent, false);
-        return new ShiftsViewHolder(view);
+
+        ShiftsViewHolder viewHolder = new ShiftsViewHolder(view, new ShiftsViewHolder.OnItemClickListener() {
+            @Override
+            public void onShiftClicked(int position) {
+                cursor.moveToPosition(position);
+                Shift shift = new Shift();
+                shift.set_id(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns._ID)));
+                shift.setStartTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.START_TIME)));
+                shift.setEndTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME)));
+                shift.setProjectName(cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME)));
+                shift.setClientId(cursor.getLong(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_ID)));
+                shift.setClientName(cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_NAME)));
+                shift.setBasePayment(cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
+                shift.setPaymentType(cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)));
+                shift.setPause(cursor.getInt(cursor.getColumnIndex(ShiftsContract.Columns.PAUSE)));
+
+                listener.onShiftClicked(shift);
+            }
+        });
+        return viewHolder;
     }
 
     @Override
@@ -54,9 +78,7 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
         String projectName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME));
         int basePayment = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT));
         int payType = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE));
-
-        Log.d(TAG, "onBindViewHolder: clientName: " + clientName);
-        Log.d(TAG, "onBindViewHolder: projectName: " + projectName);
+        int pauseMins = cursor.getInt(cursor.getColumnIndex(ShiftsContract.Columns.PAUSE));
 
 
         Shift shift = new Shift();
@@ -64,6 +86,7 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
         shift.setStartTime(startTimeDate);
         shift.setEndTime(endTimeDate);
         shift.setPaymentType(payType);
+        shift.setPause(pauseMins);
 
         long duration = shift.calculateDuration();
         long durationHours = duration / 3600000;
@@ -73,7 +96,7 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
         holder.tvProjectName.setText(projectName);
         holder.tvClientName.setText(clientName);
         holder.tvDuration.setText(String.format("%.2sh %smin", String.valueOf(durationHours), String.valueOf(durationMins)));
-        holder.tvPayment.setText(String.format(Locale.US, "%.2f EUR", shift.calculatePayment()));
+        holder.tvPause.setText(String.format(Locale.US, "Pause: %dmin", pauseMins));
 
     }
 
@@ -105,10 +128,11 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
 
     }
 
-    public static class ShiftsViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDate, tvTime, tvClientName, tvDuration, tvPayment, tvProjectName;
+    public static class ShiftsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView tvDate, tvTime, tvClientName, tvDuration, tvPayment, tvProjectName, tvPause;
+        OnItemClickListener listener;
 
-        public ShiftsViewHolder(View itemView) {
+        public ShiftsViewHolder(View itemView, OnItemClickListener listener) {
             super(itemView);
             this.tvDate = itemView.findViewById(R.id.tv_report_date);
             this.tvTime = itemView.findViewById(R.id.tv_report_time);
@@ -116,6 +140,18 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
             this.tvDuration = itemView.findViewById(R.id.tv_report_duration);
             this.tvPayment = itemView.findViewById(R.id.tv_report_payment);
             this.tvProjectName = itemView.findViewById(R.id.tv_report_projekt);
+            this.tvPause = itemView.findViewById(R.id.tv_report_pause);
+            this.listener = listener;
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            listener.onShiftClicked(getAdapterPosition());
+        }
+
+        public interface OnItemClickListener {
+            void onShiftClicked(int position);
         }
     }
 }

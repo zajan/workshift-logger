@@ -20,14 +20,16 @@ import com.ajna.workshiftlogger.fragments.ClientsListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
 import com.ajna.workshiftlogger.fragments.NewProjectFragment;
 import com.ajna.workshiftlogger.fragments.ProjectsListFragment;
+import com.ajna.workshiftlogger.fragments.ShiftDetailsFragment;
 import com.ajna.workshiftlogger.fragments.ShiftsFragment;
 import com.ajna.workshiftlogger.fragments.ShiftsListFragment;
+import com.ajna.workshiftlogger.model.Shift;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         ClientsListFragment.OnFragmentInteractionListener, NewClientFragment.OnFragmentInteractionListener,
         ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener,
         NewProjectFragment.OnFragmentInteractionListener, ShiftsFragment.OnFragmentInteractionListener,
-        ShiftsListFragment.OnFragmentInteractionListener {
+        ShiftsListFragment.OnFragmentInteractionListener, ShiftDetailsFragment.OnFragmentInteractionListener {
     private static final String TAG = "MainActivity";
 
     private ActionBarDrawerToggle toggle;
@@ -131,6 +133,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .commit();
                 break;
             case R.id.nav_invoices:
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_main, ShiftDetailsFragment.newInstance(null),
+                                ShiftDetailsFragment.class.getSimpleName())
+                        .commit();
                 break;
             case R.id.nav_settings:
                 break;
@@ -296,6 +302,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_main, ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.PICK),
                         ProjectsListFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onShiftClicked(Shift shift) {
+        toggle.setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (!mToolBarNavigationListenerIsRegistered) {
+            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+
+            mToolBarNavigationListenerIsRegistered = true;
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, ShiftDetailsFragment.newInstance(shift), ShiftDetailsFragment.class.getSimpleName())
                 .addToBackStack(null)
                 .commit();
     }

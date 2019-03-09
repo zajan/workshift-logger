@@ -29,8 +29,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:text="15:20 12.12.2018"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="15:20 12.12.2018" />
 
         <ImageView
             android:id="@+id/imageView2"
@@ -59,7 +59,8 @@
             android:layout_height="wrap_content"
             android:gravity="end"
             android:text="19:20 12.12.2018"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="19:20 12.12.2018" />
 
         <ImageView
             android:id="@+id/imageView5"
@@ -163,8 +164,7 @@
             android:layout_margin="8dp"
             android:text="Factor"
             android:textSize="14sp"
-            android:textStyle="bold"
-            tools:text="Factor" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_factor"

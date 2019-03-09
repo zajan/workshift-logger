@@ -28,6 +28,7 @@ public class ShiftsContract {
         public static final String END_TIME = "EndTime";
         public static final String PAUSE = "Pause";
         public static final String PROJECT_NAME = "ProjectName";
+        public static final String CLIENT_ID = "ClientId";
         public static final String CLIENT_NAME = "ClientName";
         public static final String CLIENT_OFFICIAL_NAME = "ClientOfficialName";
         public static final String CLIENT_ADDRESS = "ClientAddress";

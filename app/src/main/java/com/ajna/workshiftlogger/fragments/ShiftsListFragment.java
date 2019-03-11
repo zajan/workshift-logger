@@ -110,6 +110,7 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
         String[] projection = {ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns._ID,
                 ShiftsContract.Columns.START_TIME,
                 ShiftsContract.Columns.END_TIME,
+                ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID + " AS " + ShiftsContract.FullInfoColumns.PROJECT_ID,
                 ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " AS " + ShiftsContract.FullInfoColumns.PROJECT_NAME,
                 ClientsContract.TABLE_NAME + "." + ClientsContract.Columns._ID + " AS " + ShiftsContract.FullInfoColumns.CLIENT_ID,
                 ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " AS " + ShiftsContract.FullInfoColumns.CLIENT_NAME,

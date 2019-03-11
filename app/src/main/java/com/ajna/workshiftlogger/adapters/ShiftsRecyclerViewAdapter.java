@@ -21,9 +21,10 @@ import java.util.Locale;
 public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecyclerViewAdapter.ShiftsViewHolder> {
     private static final String TAG = "ShiftsRecyclerViewAdapt";
 
-    public interface  OnShiftInteractionListener{
+    public interface OnShiftInteractionListener {
         void onShiftClicked(Shift shift);
     }
+
     private OnShiftInteractionListener listener;
     private Cursor cursor;
     private final java.text.DateFormat dateFormat; // module level so we don't keep instantiating in bindView.
@@ -45,17 +46,7 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
         ShiftsViewHolder viewHolder = new ShiftsViewHolder(view, new ShiftsViewHolder.OnItemClickListener() {
             @Override
             public void onShiftClicked(int position) {
-                cursor.moveToPosition(position);
-                Shift shift = new Shift();
-                shift.set_id(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns._ID)));
-                shift.setStartTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.START_TIME)));
-                shift.setEndTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME)));
-                shift.setProjectName(cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME)));
-                shift.setClientId(cursor.getLong(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_ID)));
-                shift.setClientName(cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_NAME)));
-                shift.setBasePayment(cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
-                shift.setPaymentType(cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)));
-                shift.setPause(cursor.getInt(cursor.getColumnIndex(ShiftsContract.Columns.PAUSE)));
+                Shift shift = getShiftFromCursor(position);
 
                 listener.onShiftClicked(shift);
             }
@@ -63,46 +54,49 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
         return viewHolder;
     }
 
+    private Shift getShiftFromCursor(int position) {
+        if (!cursor.moveToPosition(position)) {
+            throw new IllegalStateException("Couldn't move cursor to position " + position);
+        }
+        Shift shift = new Shift();
+
+        shift.set_id(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns._ID)));
+        shift.setStartTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.START_TIME)));
+        shift.setEndTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME)));
+        shift.setProjectId(cursor.getLong(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_ID)));
+        shift.setProjectName(cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME)));
+        shift.setClientId(cursor.getLong(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_ID)));
+        shift.setClientName(cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_NAME)));
+        shift.setBasePayment(cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT)));
+        shift.setPaymentType(cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)));
+        shift.setPause(cursor.getInt(cursor.getColumnIndex(ShiftsContract.Columns.PAUSE)));
+
+        return shift;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ShiftsViewHolder holder, int position) {
         if ((cursor == null) || (cursor.getCount() == 0)) {
             return;
         }
-        if (!cursor.moveToPosition(position)) {
-            throw new IllegalStateException("Couldn't move cursor to position " + position);
-        }
 
-        long startTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.START_TIME));
-        long endTimeDate = cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME));
-        String clientName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.CLIENT_NAME));
-        String projectName = cursor.getString(cursor.getColumnIndex(ShiftsContract.FullInfoColumns.PROJECT_NAME));
-        int basePayment = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT));
-        int payType = cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE));
-        int pauseMins = cursor.getInt(cursor.getColumnIndex(ShiftsContract.Columns.PAUSE));
-
-
-        Shift shift = new Shift();
-        shift.setBasePayment(basePayment);
-        shift.setStartTime(startTimeDate);
-        shift.setEndTime(endTimeDate);
-        shift.setPaymentType(payType);
-        shift.setPause(pauseMins);
+        Shift shift = getShiftFromCursor(position);
 
         long duration = shift.calculateDuration();
         long durationHours = duration / 3600000;
         long durationMins = (duration % 3600000) / 60000;
         holder.tvDate.setText(dateFormat.format(shift.getStartTime()));
         holder.tvTime.setText(String.format("%s - %s", timeFormat.format(shift.getStartTime()), timeFormat.format(shift.getEndTime())));
-        holder.tvProjectName.setText(projectName);
-        holder.tvClientName.setText(clientName);
+        holder.tvProjectName.setText(shift.getProjectName());
+        holder.tvClientName.setText(shift.getClientName());
         holder.tvDuration.setText(String.format("%.2sh %smin", String.valueOf(durationHours), String.valueOf(durationMins)));
-        holder.tvPause.setText(String.format(Locale.US, "Pause: %dmin", pauseMins));
+        holder.tvPause.setText(String.format(Locale.US, "Pause: %dmin", shift.getPause()));
 
     }
 
     @Override
     public int getItemCount() {
-        if(cursor != null){
+        if (cursor != null) {
             Log.d(TAG, "getItemCount: " + cursor.getCount());
         }
         return cursor == null ? 0 : cursor.getCount();
@@ -117,7 +111,7 @@ public class ShiftsRecyclerViewAdapter extends RecyclerView.Adapter<ShiftsRecycl
 
         final Cursor oldCursor = cursor;
         cursor = newCursor;
-        if(newCursor != null) {
+        if (newCursor != null) {
             // notify the observers about the new cursor
             notifyDataSetChanged();
         } else {

@@ -11,8 +11,10 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 public class MyContentProvider extends ContentProvider {
+    private static final String TAG = "MyContentProvider";
 
     private MyDBHelper dbHelper;
     public static final UriMatcher uriMatcher = buildUriMatcher();
@@ -79,7 +81,7 @@ public class MyContentProvider extends ContentProvider {
                 queryBuilder.appendWhere(FactorsContract.Columns._ID + " = " + factorId);
                 break;
             case SHIFTS:
-                queryBuilder.setTables(ShiftsContract.TABLE_NAME + " INNER JOIN " + ProjectsContract.TABLE_NAME
+                queryBuilder.setTables(ShiftsContract.TABLE_NAME + " LEFT JOIN " + ProjectsContract.TABLE_NAME
                         + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID
                         + " = " + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PROJECT_ID
 
@@ -93,7 +95,7 @@ public class MyContentProvider extends ContentProvider {
                 );
                 break;
             case SHIFTS_ID:
-                queryBuilder.setTables(ShiftsContract.TABLE_NAME + " INNER JOIN " + ProjectsContract.TABLE_NAME
+                queryBuilder.setTables(ShiftsContract.TABLE_NAME + " LEFT JOIN " + ProjectsContract.TABLE_NAME
                         + " ON " + ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID
                         + " = " + ShiftsContract.TABLE_NAME + "." + ShiftsContract.Columns.PROJECT_ID
 
@@ -196,6 +198,7 @@ public class MyContentProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        Log.d(TAG, "delete: starts");
         final int match = uriMatcher.match(uri);
         final SQLiteDatabase db;
         int count = 0;
@@ -266,6 +269,7 @@ public class MyContentProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String selection, @Nullable String[] selectionArgs) {
+        Log.d(TAG, "update: starts");
         final int match = uriMatcher.match(uri);
         final SQLiteDatabase db;
         int count = 0;

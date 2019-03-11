@@ -15,6 +15,7 @@ public class Shift implements Serializable {
     private long startTime;
     private long endTime;
     private long pause;
+    private long projectId;
     private String projectName;
     private long clientId;
     private String clientName;
@@ -24,6 +25,13 @@ public class Shift implements Serializable {
     private int paymentType;
     private List<Factor> factors;
 
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
 
     public Shift(){
     }

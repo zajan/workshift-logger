@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.ajna.workshiftlogger.R;
+import com.ajna.workshiftlogger.activities.MainActivity;
 import com.ajna.workshiftlogger.database.ClientsContract;
 import com.ajna.workshiftlogger.database.ProjectsContract;
 
@@ -42,6 +43,7 @@ public class ProjectsListFragment extends ListFragment
 
     private static final String MODE_SHOW_OR_PICK = "modeShowOrPick";
 
+    private String callingClassName;
         SimpleCursorAdapter cursorAdapter;
 
     private OnFragmentInteractionListener mListener;
@@ -56,10 +58,11 @@ public class ProjectsListFragment extends ListFragment
      *
      * @return A new instance of fragment ProjectsListFragment.
      */
-    public static ProjectsListFragment newInstance(ProjectListShowOrPick mode) {
+    public static ProjectsListFragment newInstance(ProjectListShowOrPick mode, String callingClassName) {
         ProjectsListFragment fragment = new ProjectsListFragment();
         Bundle args = new Bundle();
         args.putSerializable(MODE_SHOW_OR_PICK, mode);
+        args.putString(MainActivity.CALLING_CLASS_NAME, callingClassName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,9 +74,12 @@ public class ProjectsListFragment extends ListFragment
         Bundle args = getArguments();
         if (args != null) {
             mode = (ProjectsListFragment.ProjectListShowOrPick) args.getSerializable(MODE_SHOW_OR_PICK);
+            if(mode == ProjectListShowOrPick.PICK){
+                callingClassName = args.getString(MainActivity.CALLING_CLASS_NAME);
+            }
         }
 
-        String[] fromColumns = {ClientsContract.Columns.NAME};
+        String[] fromColumns = {ProjectsContract.Columns.NAME};
         int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
 
         // Create an empty adapter we will use to display the loaded data.
@@ -118,7 +124,7 @@ public class ProjectsListFragment extends ListFragment
                 String clientName = cursor.getString(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_NAME));
 
                 if(mode == ProjectListShowOrPick.PICK){
-                    mListener.onProjectPicked(projectId, projectName, clientName);
+                    mListener.onProjectPicked(projectId, projectName, clientName, callingClassName);
                 } else {
                     mListener.onProjectClicked(projectName);
                 }
@@ -187,7 +193,7 @@ public class ProjectsListFragment extends ListFragment
          * @param projectName name of the picked project
          * @param clientName name of client related to picked project
          */
-        void onProjectPicked(long projectId, String projectName, String clientName);
+        void onProjectPicked(long projectId, String projectName, String clientName, String callingClassName);
 
         /**
          * method called after new project button is clicked

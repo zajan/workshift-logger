@@ -2,6 +2,7 @@ package com.ajna.workshiftlogger.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NewProjectFragment.OnFragmentInteractionListener, ShiftsFragment.OnFragmentInteractionListener,
         ShiftsListFragment.OnFragmentInteractionListener, ShiftDetailsFragment.OnFragmentInteractionListener {
     private static final String TAG = "MainActivity";
+    public static final String CALLING_CLASS_NAME = "CallingClassName";
 
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawer;
@@ -76,13 +78,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
             Log.d(TAG, "onBackPressed: backstack amount = " + backStackAmount);
 
-            if(backStackAmount >= 1) {
+            if (backStackAmount >= 1) {
                 getSupportFragmentManager().popBackStack();
                 if (backStackAmount == 1) {
                     showUpButton(false);
                 }
-            }
-             else {
+            } else {
                 super.onBackPressed();
             }
         }
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_projects:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.SHOW),
+                        .replace(R.id.fragment_main, ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.SHOW, null),
                                 ProjectsListFragment.class.getSimpleName())
                         .commit();
                 break;
@@ -209,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentManager.popBackStack();
 
         NewProjectFragment fragment = (NewProjectFragment) fragmentManager.findFragmentByTag(NewProjectFragment.class.getSimpleName());
-        if(fragment != null){
+        if (fragment != null) {
             fragment.updateClient(name);
         }
 
@@ -225,13 +226,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onSaveClicked() {
         int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
 
-        if(backStackAmount >= 1) {
+        if (backStackAmount >= 1) {
             getSupportFragmentManager().popBackStack();
             if (backStackAmount == 1) {
                 showUpButton(false);
             }
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -258,14 +258,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onProjectPicked(long projectId, String name, String clientName) {
+    public void onProjectPicked(long projectId, String name, String clientName, String callingClassName) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.popBackStack();
 
-        ShiftsFragment fragment = (ShiftsFragment) fragmentManager.findFragmentByTag(ShiftsFragment.class.getSimpleName());
-        if(fragment != null){
-            fragment.updateCurrentProject(name, projectId, clientName);
+        if (callingClassName.equals(ShiftDetailsFragment.class.getSimpleName())) {
+            ShiftDetailsFragment fragment = (ShiftDetailsFragment) fragmentManager.findFragmentByTag(ShiftDetailsFragment.class.getSimpleName());
+            if (fragment != null) {
+                fragment.updateCurrentProject(name, projectId, clientName);
+            }
         }
+        if (callingClassName.equals(ShiftsFragment.class.getSimpleName())) {
+            ShiftsFragment fragment = (ShiftsFragment) fragmentManager.findFragmentByTag(ShiftsFragment.class.getSimpleName());
+            if (fragment != null) {
+                fragment.updateCurrentProject(name, projectId, clientName);
+            }
+        }
+
     }
 
     @Override
@@ -286,24 +295,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onProjectSaved() {
         int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
 
-        if(backStackAmount >= 1) {
+        if (backStackAmount >= 1) {
             getSupportFragmentManager().popBackStack();
             if (backStackAmount == 1) {
                 showUpButton(false);
             }
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void onSelectProjectClicked() {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.PICK),
-                        ProjectsListFragment.class.getSimpleName())
-                .addToBackStack(null)
-                .commit();
     }
 
     @Override
@@ -325,5 +324,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .replace(R.id.fragment_main, ShiftDetailsFragment.newInstance(shift), ShiftDetailsFragment.class.getSimpleName())
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    public void onSelectProjectClicked() {
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragment_main);
+
+        ProjectsListFragment fragment = ProjectsListFragment.newInstance(ProjectsListFragment.ProjectListShowOrPick.PICK, f.getTag());
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, fragment,
+                        ProjectsListFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onShiftUpdated() {
+        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (backStackAmount >= 1) {
+            getSupportFragmentManager().popBackStack();
+            if (backStackAmount == 1) {
+                showUpButton(false);
+            }
+        } else {
+            super.onBackPressed();
+        }
     }
 }

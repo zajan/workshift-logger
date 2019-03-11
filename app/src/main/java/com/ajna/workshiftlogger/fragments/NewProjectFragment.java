@@ -223,8 +223,8 @@ public class NewProjectFragment extends Fragment  implements LoaderManager.Loade
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
             String[] PROJECTION = {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
-                    ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME,
-                    ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME};
+                    ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " AS " + ProjectsContract.FullInfoColumns.PROJECT_NAME,
+                    ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " AS " + ProjectsContract.FullInfoColumns.CLIENT_NAME};
             String SELECTION = ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " = ? ";
             String SELECTION_ARGS[] = {initProjectName};
 
@@ -236,8 +236,8 @@ public class NewProjectFragment extends Fragment  implements LoaderManager.Loade
         cursor.moveToFirst();
 
         initProjectId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.Columns._ID));
-        String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
-        String clientName = cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME));
+        String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.PROJECT_NAME));
+        String clientName = cursor.getString(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_NAME));
         Log.d(TAG, "onLoadFinished: ---------------------");
         Log.d(TAG, "onLoadFinished: projectName: " + projectName + "  clientName: " + clientName);
         Project project = new Project(projectName, clientName);

@@ -141,7 +141,7 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
             @Override
             public void onClick(View view) {
                 if (saveClient()) {
-                    mListener.onSaveClicked();
+                    mListener.onSaveClientClicked();
                 }
             }
         });
@@ -439,6 +439,6 @@ public class NewClientFragment extends Fragment implements FactorsRecyclerViewAd
  * >Communicating with Other Fragments</a> for more information.
  */
 public interface OnFragmentInteractionListener {
-    void onSaveClicked();
+    void onSaveClientClicked();
 }
 }

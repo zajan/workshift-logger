@@ -181,22 +181,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
     }
+    private void popFragmentBackStack(){
+        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (backStackAmount >= 1) {
+            getSupportFragmentManager().popBackStack();
+            if (backStackAmount == 1) {
+                showUpButton(false);
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public void onClientClicked(String name) {
         Log.d(TAG, "onNewClientClicked: starts");
-        toggle.setDrawerIndicatorEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (!mToolBarNavigationListenerIsRegistered) {
-            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onBackPressed();
-                }
-            });
-
-            mToolBarNavigationListenerIsRegistered = true;
-        }
+        showUpButton(true);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_main, NewClientFragment.newInstance(name), NewClientFragment.class.getSimpleName())
@@ -223,33 +224,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onSaveClicked() {
-        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
-
-        if (backStackAmount >= 1) {
-            getSupportFragmentManager().popBackStack();
-            if (backStackAmount == 1) {
-                showUpButton(false);
-            }
-        } else {
-            super.onBackPressed();
-        }
+    public void onSaveClientClicked() {
+        popFragmentBackStack();
+    }
+    @Override
+    public void onSelectClientClicked() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, ClientsListFragment.newInstance(ClientsListFragment.ClientListShowOrPick.PICK),
+                        ClientsListFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
     public void onProjectClicked(String name) {
-        toggle.setDrawerIndicatorEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (!mToolBarNavigationListenerIsRegistered) {
-            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onBackPressed();
-                }
-            });
-
-            mToolBarNavigationListenerIsRegistered = true;
-        }
+        showUpButton(true);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_main, NewProjectFragment.newInstance(name), NewProjectFragment.class.getSimpleName())
@@ -282,48 +271,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         onProjectClicked(null);
     }
 
-    @Override
-    public void onSelectClientClicked() {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, ClientsListFragment.newInstance(ClientsListFragment.ClientListShowOrPick.PICK),
-                        ClientsListFragment.class.getSimpleName())
-                .addToBackStack(null)
-                .commit();
-    }
 
     @Override
     public void onProjectSaved() {
-        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
-
-        if (backStackAmount >= 1) {
-            getSupportFragmentManager().popBackStack();
-            if (backStackAmount == 1) {
-                showUpButton(false);
-            }
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void onShiftClicked(Shift shift) {
-        toggle.setDrawerIndicatorEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (!mToolBarNavigationListenerIsRegistered) {
-            toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onBackPressed();
-                }
-            });
-
-            mToolBarNavigationListenerIsRegistered = true;
-        }
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_main, ShiftDetailsFragment.newInstance(shift), ShiftDetailsFragment.class.getSimpleName())
-                .addToBackStack(null)
-                .commit();
+        popFragmentBackStack();
     }
 
     @Override
@@ -340,16 +291,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onShiftUpdated() {
-        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+    public void onShiftClicked(Shift shift) {
+        showUpButton(true);
 
-        if (backStackAmount >= 1) {
-            getSupportFragmentManager().popBackStack();
-            if (backStackAmount == 1) {
-                showUpButton(false);
-            }
-        } else {
-            super.onBackPressed();
-        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, ShiftDetailsFragment.newInstance(shift), ShiftDetailsFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
     }
+
+
+    @Override
+    public void onShiftUpdated() {
+        popFragmentBackStack();
+    }
+
 }

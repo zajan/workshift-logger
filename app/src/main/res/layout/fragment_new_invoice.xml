@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:padding="8dp"
+            android:stretchColumns="1,2"
+            tools:context=".fragments.NewInvoiceFragment">
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/tv_select_project"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_span="2"
+                    android:drawableStart="@drawable/ic_work_grey_24dp"
+                    android:drawableEnd="@drawable/ic_edit_grey_24dp"
+                    android:text="Project 1234"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="32dp"
+                    android:text="File name"
+                    android:textAppearance="@android:style/TextAppearance.Material" />
+
+                <EditText
+                    android:id="@+id/et_file_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_invoice_nr"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Invoice nr" />
+
+                <EditText
+                    android:id="@+id/et_invoice_nr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_date"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Date" />
+
+                <EditText
+                    android:id="@+id/et_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_project_name"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/project_name" />
+
+                <EditText
+                    android:id="@+id/et_project_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_extra_1"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Extra info 1" />
+
+                <EditText
+                    android:id="@+id/et_extra_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_extra_2"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Extra info 2" />
+
+                <EditText
+                    android:id="@+id/et_extra_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow android:layout_marginTop="16dp">
+
+                <TextView
+                    android:text="Your personal info"
+                    android:textAllCaps="true"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_name"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Name" />
+
+                <EditText
+                    android:id="@+id/et_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_address"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Address" />
+
+                <EditText
+                    android:id="@+id/et_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow android:layout_height="91dp">
+
+                <CheckBox
+                    android:id="@+id/cb_address_2"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Address 2" />
+
+                <EditText
+                    android:id="@+id/et_address_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:lines="2"
+                    android:minLines="2"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow android:layout_height="91dp">
+
+                <CheckBox
+                    android:id="@+id/cb_phone"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Phone nr" />
+
+                <EditText
+                    android:id="@+id/et_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:lines="2"
+                    android:minLines="2"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow android:layout_height="91dp">
+
+                <CheckBox
+                    android:id="@+id/cb_email"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="E-mail" />
+
+                <EditText
+                    android:id="@+id/et_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:lines="2"
+                    android:minLines="2"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow android:layout_marginTop="16dp">
+
+                <TextView
+                    android:text="Client"
+                    android:textAllCaps="true"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_client_name"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Name" />
+
+                <EditText
+                    android:id="@+id/et_client_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/cb_official_name"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Official name" />
+
+                <EditText
+                    android:id="@+id/et_official_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow android:layout_height="91dp">
+
+                <CheckBox
+                    android:id="@+id/cb_client_address"
+                    style="@style/CheckBoxText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="Address" />
+
+                <EditText
+                    android:id="@+id/et_client_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:lines="2"
+                    android:minLines="2"
+                    android:textSize="16sp" />
+
+            </TableRow>
+
+            <TableRow android:layout_marginTop="16dp">
+
+                <TextView
+                    android:text="Shifts"
+                    android:textAllCaps="true"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </TableRow>
+        </TableLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_invoice_shifts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            tools:listitem="@layout/item_invoive_shift" />
+    </LinearLayout>
+</ScrollView>

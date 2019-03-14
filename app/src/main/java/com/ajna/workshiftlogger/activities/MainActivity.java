@@ -18,7 +18,9 @@ import android.view.View;
 import com.ajna.workshiftlogger.R;
 import com.ajna.workshiftlogger.fragments.ActiveShiftFragment;
 import com.ajna.workshiftlogger.fragments.ClientsListFragment;
+import com.ajna.workshiftlogger.fragments.InvoicesListFragment;
 import com.ajna.workshiftlogger.fragments.NewClientFragment;
+import com.ajna.workshiftlogger.fragments.NewInvoiceFragment;
 import com.ajna.workshiftlogger.fragments.NewProjectFragment;
 import com.ajna.workshiftlogger.fragments.ProjectsListFragment;
 import com.ajna.workshiftlogger.fragments.ShiftDetailsFragment;
@@ -30,7 +32,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ClientsListFragment.OnFragmentInteractionListener, NewClientFragment.OnFragmentInteractionListener,
         ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener,
         NewProjectFragment.OnFragmentInteractionListener, ShiftsFragment.OnFragmentInteractionListener,
-        ShiftsListFragment.OnFragmentInteractionListener, ShiftDetailsFragment.OnFragmentInteractionListener {
+        ShiftsListFragment.OnFragmentInteractionListener, ShiftDetailsFragment.OnFragmentInteractionListener,
+        InvoicesListFragment.OnFragmentInteractionListener, NewInvoiceFragment.OnFragmentInteractionListener{
     private static final String TAG = "MainActivity";
     public static final String CALLING_CLASS_NAME = "CallingClassName";
 
@@ -135,8 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_invoices:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_main, ShiftDetailsFragment.newInstance(null),
-                                ShiftDetailsFragment.class.getSimpleName())
+                        .replace(R.id.fragment_main, InvoicesListFragment.newInstance(), InvoicesListFragment.class.getSimpleName())
                         .commit();
                 break;
             case R.id.nav_settings:
@@ -247,20 +249,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onProjectPicked(long projectId, String name, String clientName, String callingClassName) {
+    public void onProjectPicked(long projectId, String projectName, long clientId, String clientName, String callingClassName) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.popBackStack();
 
         if (callingClassName.equals(ShiftDetailsFragment.class.getSimpleName())) {
             ShiftDetailsFragment fragment = (ShiftDetailsFragment) fragmentManager.findFragmentByTag(ShiftDetailsFragment.class.getSimpleName());
             if (fragment != null) {
-                fragment.updateCurrentProject(name, projectId, clientName);
+                fragment.updateCurrentProject(projectName, projectId, clientName);
             }
         }
         if (callingClassName.equals(ShiftsFragment.class.getSimpleName())) {
             ShiftsFragment fragment = (ShiftsFragment) fragmentManager.findFragmentByTag(ShiftsFragment.class.getSimpleName());
             if (fragment != null) {
-                fragment.updateCurrentProject(name, projectId, clientName);
+                fragment.updateCurrentProject(projectName, projectId, clientName);
+            }
+        }
+        if(callingClassName.equals(NewInvoiceFragment.class.getSimpleName())){
+            NewInvoiceFragment fragment = (NewInvoiceFragment) fragmentManager.findFragmentByTag(NewInvoiceFragment.class.getSimpleName());
+            if(fragment != null) {
+                fragment.updateCurrentProject(projectName, projectId, clientId, clientName);
             }
         }
 
@@ -306,4 +314,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         popFragmentBackStack();
     }
 
+    @Override
+    public void onNewInvoiceClicked() {
+        showUpButton(true);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_main, NewInvoiceFragment.newInstance(), NewInvoiceFragment.class.getSimpleName())
+                .addToBackStack(null)
+                .commit();
+    }
 }

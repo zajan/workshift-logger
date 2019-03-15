@@ -9,6 +9,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +20,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.ajna.workshiftlogger.R;
+import com.ajna.workshiftlogger.adapters.InvoiceShiftsRecyclerViewAdapter;
 import com.ajna.workshiftlogger.database.ClientsContract;
 import com.ajna.workshiftlogger.database.FactorsContract;
 import com.ajna.workshiftlogger.database.ShiftsContract;
+import com.ajna.workshiftlogger.model.Client;
 import com.ajna.workshiftlogger.model.Factor;
 import com.ajna.workshiftlogger.model.Project;
 import com.ajna.workshiftlogger.model.Shift;
@@ -48,10 +52,15 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
     public static final int LOADER_SHIFTS = 3;
 
     private OnFragmentInteractionListener mListener;
+
     private Project project;
+    private Client client;
+    private List<Factor> factors;
+    private List<Shift> shifts = new ArrayList<>();
+
     private boolean areGeneralFieldsInitialized = false;
     private boolean wasProjectChosen = false;
-    private List<Factor> factors;
+    private boolean wasShiftQueried = false;
 
     private TextView tvSelectProject;
 
@@ -59,6 +68,9 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
             cbPhone, cbEmail, cbClientName, cbClientOffName, cbClientAddress;
     private EditText etFileName, etInvoiceNr, etDate, etProjectName, etExtra1, etExtra2, etName, etAddress1, etAddress2,
             etPhone, etEmail, etClientName, etClientOffName, etClientAddress;
+    private RecyclerView rvShifts;
+
+    private InvoiceShiftsRecyclerViewAdapter rvAdapter;
 
     public NewInvoiceFragment() {
         // Required empty public constructor
@@ -123,6 +135,11 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
         etClientName = view.findViewById(R.id.et_client_name);
         etClientOffName = view.findViewById(R.id.et_official_name);
         etClientAddress = view.findViewById(R.id.et_client_address);
+        rvShifts = view.findViewById(R.id.rv_invoice_shifts);
+
+        rvAdapter = new InvoiceShiftsRecyclerViewAdapter(getContext(), shifts);
+        rvShifts.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvShifts.setAdapter(rvAdapter);
 
         tvSelectProject.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,9 +189,9 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
         } else {
             lm.initLoader(LOADER_CLIENT, null, this);
             lm.initLoader(LOADER_FACTORS, null, this);
+            wasProjectChosen = true;
         }
 
-        wasProjectChosen = true;
     }
 
     private void initializeGeneralFields() {
@@ -199,13 +216,19 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
         etProjectName.setText(projectName);
     }
 
-    private void updateClientFields(Cursor cursor) {
-        cursor.moveToFirst();
-        etClientName.setText(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME)));
-        etClientOffName.setText(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.OFFICIAL_NAME)));
-        etClientAddress.setText(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.ADDRESS)));
+    private void updateClientFields() {
+        etClientName.setText(client.getName());
+        etClientOffName.setText(client.getOfficialName());
+        etClientAddress.setText(client.getAddress());
+    }
 
-        cursor.close();
+    private void updateClient(Cursor cursor){
+        cursor.moveToFirst();
+        client = new Client(cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.NAME)),
+                cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.OFFICIAL_NAME)),
+                cursor.getString(cursor.getColumnIndex(ClientsContract.Columns.ADDRESS)),
+                cursor.getInt(cursor.getColumnIndex(ClientsContract.Columns.PAY_TYPE)),
+                cursor.getColumnIndex(ClientsContract.Columns.BASE_PAYMENT));
     }
 
     private void updateFactors(Cursor cursor){
@@ -219,17 +242,18 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
             } while (cursor.moveToNext());
         }
 
-        cursor.close();
+//        cursor.close();
     }
     private void updateShiftsFields(Cursor cursor){
         List<Shift> shifts = getShiftsListFromCursor(cursor);
 
-        // TODO
+        Log.d(TAG, "updateShiftsFields: shifts.size() = " + shifts.size());
 
-        cursor.close();
+        rvAdapter.notifyDataSetChanged();
+
+//        cursor.close();
     }
     private List<Shift> getShiftsListFromCursor(Cursor cursor){
-        List<Shift> shifts = new ArrayList<>();
         cursor.moveToFirst();
         if(cursor.getCount() > 0){
             do {
@@ -239,6 +263,8 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
                 shift.setEndTime(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.END_TIME)));
                 shift.setPause(cursor.getLong(cursor.getColumnIndex(ShiftsContract.Columns.PAUSE)));
                 shift.setFactors(factors);
+                shift.setBasePayment(client.getBasicPayment());
+                shift.setPaymentType(client.getPaymentType());
 
                 shifts.add(shift);
             } while (cursor.moveToNext());
@@ -274,14 +300,20 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
         int loaderID = loader.getId();
         switch (loaderID) {
             case LOADER_CLIENT:
-                updateClientFields(cursor);
+                updateClient(cursor);
+                updateClientFields();
                 break;
             case LOADER_FACTORS:
                 updateFactors(cursor);
                 // loader for shifts is initialized when loading factors is finished - the reason is to make sure
                 // that when loader for shifts is finished factors are already initialized
                 // and so calculations for shifts can be processed
-                getLoaderManager().initLoader(LOADER_SHIFTS, null, this);
+                if(wasShiftQueried){
+                    getLoaderManager().restartLoader(LOADER_SHIFTS, null, this);
+                } else {
+                    getLoaderManager().initLoader(LOADER_SHIFTS, null, this);
+                    wasShiftQueried = true;
+                }
                 break;
             case LOADER_SHIFTS:
                 updateShiftsFields(cursor);

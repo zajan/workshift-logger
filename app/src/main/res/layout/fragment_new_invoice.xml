@@ -343,6 +343,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            tools:listitem="@layout/item_invoive_shift" />
+            tools:listitem="@layout/item_invoice_shift" />
     </LinearLayout>
 </ScrollView>

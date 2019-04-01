@@ -3,6 +3,7 @@ package com.ajna.workshiftlogger.fragments;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -13,11 +14,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -25,7 +28,6 @@ import android.widget.Toast;
 import com.ajna.workshiftlogger.R;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,9 +42,6 @@ import java.util.List;
 public class InvoicesListFragment extends Fragment {
     private static final String TAG = "InvoicesListFragment";
     final private int REQUEST_CODE_ASK_PERMISSIONS = 111;
-
-    //    public static final String FOLDER_NAME = "WorkshiftLogger-INVOICES";
-    public static final String FOLDER_NAME = "PDFTest";
 
     File[] files;
     List<String> fileNames = new ArrayList<>();
@@ -69,13 +68,6 @@ public class InvoicesListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int hasWriteStoragePermission = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (hasWriteStoragePermission != PackageManager.PERMISSION_GRANTED) {
-            requestPermission();
-        } else {
-            listFiles();
-        }
 
         arrayAdapter = new ArrayAdapter<>(
                 getContext(),
@@ -88,6 +80,7 @@ public class InvoicesListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_invoices_list, container, false);
     }
@@ -120,13 +113,26 @@ public class InvoicesListFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        int hasWriteStoragePermission = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (hasWriteStoragePermission != PackageManager.PERMISSION_GRANTED) {
+            requestPermission();
+        } else {
+            listFiles();
+            arrayAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
     private void listFiles() {
-        String path = Environment.getExternalStorageDirectory().toString() + "/" + FOLDER_NAME;
+        String path = Environment.getExternalStorageDirectory().toString() + "/" + getString(R.string.folder_name);
         Log.d(TAG, "listFiles: path = " + path);
         File directory = new File(path);
         files = directory.listFiles();

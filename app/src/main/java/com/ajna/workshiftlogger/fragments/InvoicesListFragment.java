@@ -91,6 +91,13 @@ public class InvoicesListFragment extends Fragment {
         lvFiles = view.findViewById(R.id.lv_invoices);
         lvFiles.setAdapter(arrayAdapter);
 
+        lvFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                String fileName = (String) adapterView.getItemAtPosition(position);
+                previewPdf(fileName);
+            }
+        });
         FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,6 +190,27 @@ public class InvoicesListFragment extends Fragment {
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+    private void previewPdf(String fileName) {
+
+        String path = Environment.getExternalStorageDirectory() + "/" + getString(R.string.folder_name) + "/" + fileName;
+        File file = new File(path);
+        Uri uri = FileProvider.getUriForFile(getContext(), getString(R.string.file_provider_authority), file);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+            intent.setData(uri);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } else {
+
+            intent.setDataAndType(uri, "application/pdf");
+            intent = Intent.createChooser(intent, "Open File");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 

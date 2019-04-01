@@ -58,12 +58,6 @@ public class InvoiceShiftsRecyclerViewAdapter extends RecyclerView.Adapter<Invoi
 
     @Override
     public int getItemCount() {
-        Log.d(TAG, "getItemCount: starts" );
-        if(shifts == null){
-            Log.d(TAG, "getItemCount: shifts == null");
-        } else {
-            Log.d(TAG, "getItemCount: shifts.size() = " + shifts.size());
-        }
         return shifts == null ? 0 : shifts.size();
     }
 

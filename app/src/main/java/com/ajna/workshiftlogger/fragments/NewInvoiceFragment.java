@@ -2,6 +2,7 @@ package com.ajna.workshiftlogger.fragments;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -24,11 +28,14 @@ import com.ajna.workshiftlogger.adapters.InvoiceShiftsRecyclerViewAdapter;
 import com.ajna.workshiftlogger.database.ClientsContract;
 import com.ajna.workshiftlogger.database.FactorsContract;
 import com.ajna.workshiftlogger.database.ShiftsContract;
+import com.ajna.workshiftlogger.databinding.FragmentNewInvoiceBinding;
 import com.ajna.workshiftlogger.model.Client;
 import com.ajna.workshiftlogger.model.Factor;
 import com.ajna.workshiftlogger.model.Project;
 import com.ajna.workshiftlogger.model.Shift;
+import com.ajna.workshiftlogger.utils.InvoicePDFGenerator;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,15 +69,8 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
     private boolean wasProjectChosen = false;
     private boolean wasShiftQueried = false;
 
-    private TextView tvSelectProject;
+    FragmentNewInvoiceBinding binding;
 
-    private CheckBox cbInvoiceNr, cbDate, cbProjectName, cbExtra1, cbExtra2, cbName, cbAddress1, cbAddress2,
-            cbPhone, cbEmail, cbClientName, cbClientOffName, cbClientAddress;
-    private EditText etFileName, etInvoiceNr, etDate, etProjectName, etExtra1, etExtra2, etName, etAddress1, etAddress2,
-            etPhone, etEmail, etClientName, etClientOffName, etClientAddress;
-    private RecyclerView rvShifts;
-
-    private InvoiceShiftsRecyclerViewAdapter rvAdapter;
 
     public NewInvoiceFragment() {
         // Required empty public constructor
@@ -84,64 +84,29 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
      */
 
     public static NewInvoiceFragment newInstance() {
-
         return new NewInvoiceFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: starts");
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_new_invoice, container, false);
+
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_new_invoice, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onViewCreated: starts");
         super.onViewCreated(view, savedInstanceState);
-        tvSelectProject = view.findViewById(R.id.tv_select_project);
 
-        cbInvoiceNr = view.findViewById(R.id.cb_invoice_nr);
-        cbDate = view.findViewById(R.id.cb_date);
-        cbProjectName = view.findViewById(R.id.cb_project_name);
-        cbExtra1 = view.findViewById(R.id.cb_extra_1);
-        cbExtra2 = view.findViewById(R.id.cb_extra_2);
-        cbName = view.findViewById(R.id.cb_name);
-        cbAddress1 = view.findViewById(R.id.cb_address);
-        cbAddress2 = view.findViewById(R.id.cb_address_2);
-        cbPhone = view.findViewById(R.id.cb_phone);
-        cbEmail = view.findViewById(R.id.cb_email);
-        cbClientName = view.findViewById(R.id.cb_client_name);
-        cbClientOffName = view.findViewById(R.id.cb_official_name);
-        cbClientAddress = view.findViewById(R.id.cb_client_address);
 
-        etFileName = view.findViewById(R.id.et_file_name);
-        etInvoiceNr = view.findViewById(R.id.et_invoice_nr);
-        etDate = view.findViewById(R.id.et_date);
-        etProjectName = view.findViewById(R.id.et_project_name);
-        etExtra1 = view.findViewById(R.id.et_extra_1);
-        etExtra2 = view.findViewById(R.id.et_extra_2);
-        etName = view.findViewById(R.id.et_name);
-        etAddress1 = view.findViewById(R.id.et_address);
-        etAddress2 = view.findViewById(R.id.et_address_2);
-        etPhone = view.findViewById(R.id.et_phone);
-        etEmail = view.findViewById(R.id.et_email);
-        etClientName = view.findViewById(R.id.et_client_name);
-        etClientOffName = view.findViewById(R.id.et_official_name);
-        etClientAddress = view.findViewById(R.id.et_client_address);
-        rvShifts = view.findViewById(R.id.rv_invoice_shifts);
-
-        rvAdapter = new InvoiceShiftsRecyclerViewAdapter(getContext(), shifts);
-        rvShifts.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvShifts.setAdapter(rvAdapter);
-
-        tvSelectProject.setOnClickListener(new View.OnClickListener() {
+        binding.tvSelectProject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mListener.onSelectProjectClicked();
@@ -178,6 +143,76 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
         mListener = null;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.new_invoice_fragment_options, menu);
+        super.onCreateOptionsMenu(menu,inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.create_pdf){
+            createPdf();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void createPdf(){
+        if(!validateFileName()){
+            return;
+        }
+        InvoicePDFGenerator invoice = new InvoicePDFGenerator(binding.etFileName.getText().toString().trim(), getString(R.string.folder_name));
+
+        String name = binding.etName.getText().toString().trim();
+        if(binding.cbName.isChecked() && (name.length() > 0)){
+            invoice.setPersonName(name);
+        }
+        String address1 = binding.etAddress.getText().toString().trim();
+        if(binding.cbAddress.isChecked() && (address1.length() > 0)){
+            invoice.setPersonAddress1(address1);
+        }
+        String address2 = binding.etAddress2.getText().toString().trim();
+        if(binding.cbAddress2.isChecked() && (address2.length() > 0)){
+            invoice.setPersonAddress2(address2);
+        }
+        String phone = binding.etPhone.getText().toString().trim();
+        if(binding.cbPhone.isChecked() && (phone.length() > 0)){
+            invoice.setPhoneNr(phone);
+        }
+        String email = binding.etEmail.getText().toString().trim();
+        if(binding.cbEmail.isChecked() && (email.length() > 0)){
+            invoice.setEmail(email);
+        }
+        String clientName = binding.etOfficialName.getText().toString().trim();
+        if(binding.cbOfficialName.isChecked() && (clientName.length() > 0)){
+            invoice.setClientOfficialName(clientName);
+        }
+        String clientAddress = binding.etClientAddress.getText().toString().trim();
+        if(binding.cbClientAddress.isChecked() && (clientAddress.length() > 0)){
+            invoice.setClientAddress(clientAddress);
+        }
+
+        String invoiceNr = binding.etInvoiceNr.getText().toString().trim();
+        if(binding.cbInvoiceNr.isChecked() && (invoiceNr.length() > 0)){
+            invoice.setInvoiceNr(invoiceNr);
+        }
+
+        invoice.setShifts(shifts, android.text.format.DateFormat.getDateFormat(getContext()), android.text.format.DateFormat.getTimeFormat(getContext()));
+
+        File pdfFile = invoice.generateInvoice();
+        if(pdfFile != null){
+            invoice.previewPDF(pdfFile, getContext());
+        }
+    }
+private boolean validateFileName(){
+        String fileName = binding.etFileName.getText().toString();
+        if(fileName.isEmpty() || fileName.trim().length() < 1){
+            binding.etFileName.setError("Enter file name");
+            return false;
+        }
+        return true;
+}
     public void updateCurrentProject(String projectName, long projectId, long clientId, String clientName) {
         Log.d(TAG, "updateCurrentProject: starts");
         project = new Project(projectId, projectName, clientName, clientId);
@@ -198,13 +233,13 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
         Log.d(TAG, "initializeGeneralFields: starts");
         Date date = Calendar.getInstance().getTime();
         DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
-        etDate.setText(dateFormat.format(date));
+        binding.etDate.setText(dateFormat.format(date));
 
         SimpleDateFormat invoiceTitleFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        etFileName.setText(String.format("INV-%s", invoiceTitleFormat.format(date)));
+        binding.etFileName.setText(String.format("INV-%s", invoiceTitleFormat.format(date)));
 
         if (project != null) {
-            etProjectName.setText(project.getName());
+            binding.etProjectName.setText(project.getName());
         }
 
         areGeneralFieldsInitialized = true;
@@ -212,14 +247,14 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
 
     private void updateProjectFields(String projectName) {
         Log.d(TAG, "updateProjectFields: starts projectName = " + projectName);
-        tvSelectProject.setText(projectName);
-        etProjectName.setText(projectName);
+        binding.tvSelectProject.setText(projectName);
+        binding.etProjectName.setText(projectName);
     }
 
     private void updateClientFields() {
-        etClientName.setText(client.getName());
-        etClientOffName.setText(client.getOfficialName());
-        etClientAddress.setText(client.getAddress());
+        binding.etClientName.setText(client.getName());
+        binding.etOfficialName.setText(client.getOfficialName());
+        binding.etClientAddress.setText(client.getAddress());
     }
 
     private void updateClient(Cursor cursor){
@@ -241,17 +276,12 @@ public class NewInvoiceFragment extends Fragment implements LoaderManager.Loader
                 factors.add(factor);
             } while (cursor.moveToNext());
         }
-
-//        cursor.close();
     }
     private void updateShiftsFields(Cursor cursor){
-        List<Shift> shifts = getShiftsListFromCursor(cursor);
+        shifts = getShiftsListFromCursor(cursor);
 
         Log.d(TAG, "updateShiftsFields: shifts.size() = " + shifts.size());
 
-        rvAdapter.notifyDataSetChanged();
-
-//        cursor.close();
     }
     private List<Shift> getShiftsListFromCursor(Cursor cursor){
         cursor.moveToFirst();

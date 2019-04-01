@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:fillViewport="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <data></data>
+
+    <ScrollView
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:fillViewport="true">
 
         <TableLayout
             android:layout_width="match_parent"
@@ -29,7 +27,7 @@
                     android:layout_span="2"
                     android:drawableStart="@drawable/ic_work_grey_24dp"
                     android:drawableEnd="@drawable/ic_edit_grey_24dp"
-                    android:text="Project 1234"
+                    android:text="Select project.."
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
@@ -118,7 +116,7 @@
                     style="@style/CheckBoxText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
+                    android:checked="false"
                     android:text="Extra info 1" />
 
                 <EditText
@@ -137,7 +135,7 @@
                     style="@style/CheckBoxText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
+                    android:checked="false"
                     android:text="Extra info 2" />
 
                 <EditText
@@ -275,7 +273,7 @@
                     style="@style/CheckBoxText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
+                    android:checked="false"
                     android:text="Name" />
 
                 <EditText
@@ -328,21 +326,13 @@
 
             </TableRow>
 
-            <TableRow android:layout_marginTop="16dp">
+            <TableRow>
 
-                <TextView
-                    android:text="Shifts"
-                    android:textAllCaps="true"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="48dp" />
             </TableRow>
         </TableLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_invoice_shifts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            tools:listitem="@layout/item_invoice_shift" />
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</layout>

@@ -37,13 +37,13 @@ import java.util.Date;
 public class ActiveShiftFragment extends Fragment {
     private static final String TAG = "ActiveShiftFragment";
 
-    private boolean isShiftStarted = false;
     public static final String SHARED_PREFS_START_TIME = "SharedPrefsStartTime";
     public static final String SHARED_PREFS_PROJECT_NAME = "SharedPrefsProjectName";
     public static final String SHARED_PREFS_PROJECT_ID = "ProjectId";
     public static final String SHARED_PREFS_CLIENT_NAME = "SharedPrefsClientName";
     public static final String SHARED_PREFS_PAUSE = "SharedPrefsPause";
 
+    private boolean isShiftStarted = false;
     private OnFragmentInteractionListener mListener;
 
     public ActiveShiftFragment() {
@@ -56,7 +56,6 @@ public class ActiveShiftFragment extends Fragment {
      *
      * @return A new instance of fragment ActiveShiftFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ActiveShiftFragment newInstance() {
         ActiveShiftFragment fragment = new ActiveShiftFragment();
         Bundle args = new Bundle();

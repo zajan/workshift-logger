@@ -35,13 +35,16 @@ import com.ajna.workshiftlogger.model.Shift;
  */
 public class ShiftsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
         ShiftsRecyclerViewAdapter.OnShiftInteractionListener{
-    private static final String TAG = "ShiftsListFragment";
 
+    // == constants ==
+    private static final String TAG = "ShiftsListFragment";
     public static final int LOADER_ID = 5;
 
+    // == fields ==
     private OnFragmentInteractionListener mListener;
-
     private ShiftsRecyclerViewAdapter shiftsRVAdapter;
+
+    // == constructors and newInstance method ==
 
     public ShiftsListFragment() {
         // Required empty public constructor
@@ -53,13 +56,11 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
      *
      * @return A new instance of fragment ShiftsListFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ShiftsListFragment newInstance() {
-        ShiftsListFragment fragment = new ShiftsListFragment();
-
-        return fragment;
+        return new ShiftsListFragment();
     }
 
+    // == callback methods ==
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,13 +138,14 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
         shiftsRVAdapter.swapCursor(null);
     }
 
+    // == override methods ==
 
     @Override
     public void onShiftClicked(Shift shift) {
-        Log.d(TAG, "onShiftClicked: " + shift.getClientName());
         mListener.onShiftClicked(shift);
     }
 
+    // == interfaces ==
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -155,6 +157,10 @@ public class ShiftsListFragment extends Fragment implements LoaderManager.Loader
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
+        /**
+         * This method is called when user taps on item on shifts list
+         * @param shift Shift object which representation was clicked
+         */
         void onShiftClicked(Shift shift);
     }
 }

@@ -24,19 +24,19 @@ import static com.ajna.workshiftlogger.fragments.ActiveShiftFragment.SHARED_PREF
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ShiftsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link ShiftsFragment#newInstance} factory method to
  * create an instance of this fragment.
+ * This fragment manages two children fragments
+ * and is using ViewPager for navigation between them
  */
 public class ShiftsFragment extends Fragment{
+    // == constants ==
     private static final String TAG = "ShiftsFragment";
 
-    private OnFragmentInteractionListener mListener;
-
+    // == fields ==
     private MyFragmentPagerAdapter adapter;
 
+    // == constructors and newInstance() ==
     public ShiftsFragment() {
         // Required empty public constructor
     }
@@ -47,12 +47,12 @@ public class ShiftsFragment extends Fragment{
      *
      * @return A new instance of fragment ShiftsFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static ShiftsFragment newInstance() {
         ShiftsFragment fragment = new ShiftsFragment();
         return fragment;
     }
 
+    // == callback methods ==
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,38 +61,40 @@ public class ShiftsFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_shifts, container, false);
-        // Setting ViewPager for each Tabs
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        adapter = new MyFragmentPagerAdapter(getChildFragmentManager());
-        adapter.addFragment(ActiveShiftFragment.newInstance(), "Active shift");
-        adapter.addFragment(ShiftsListFragment.newInstance(), "Finished");
-
-        viewPager.setAdapter(adapter);
-        // Set Tabs inside Toolbar
-        TabLayout tabs = (TabLayout) view.findViewById(R.id.result_tabs);
-        tabs.setupWithViewPager(viewPager);
+        setupViewPager(view);
         return view;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
+    // == private methods ==
+    private void setupViewPager(View view){
+        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        adapter = new MyFragmentPagerAdapter(getChildFragmentManager());
+        adapter.addFragment(ActiveShiftFragment.newInstance(), getString(R.string.active_shift));
+        adapter.addFragment(ShiftsListFragment.newInstance(), getString(R.string.finished));
+
+        viewPager.setAdapter(adapter);
+        TabLayout tabs = (TabLayout) view.findViewById(R.id.result_tabs);
+        tabs.setupWithViewPager(viewPager);
+    }
+
+    /**
+     * This method updates project of currently active shift
+     * which is stored in shared preferences
+     * @param projectName
+     * @param projectId
+     * @param clientName
+     */
     public void updateCurrentProject(String projectName, long projectId, String clientName){
         SharedPreferences sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPrefs.edit();
@@ -100,19 +102,9 @@ public class ShiftsFragment extends Fragment{
         editor.putLong(SHARED_PREFS_PROJECT_ID, projectId);
         editor.putString(SHARED_PREFS_CLIENT_NAME, clientName);
         editor.apply();
-
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     */
-    public interface OnFragmentInteractionListener {
-
-    }
+    // == inner class ==
 
     static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();

@@ -34,22 +34,17 @@ import com.ajna.workshiftlogger.database.ProjectsContract;
 public class ProjectsListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /**
-     * use SHOW value when open this fragment to display and/or edit client records
-     * use PICK value when open this fragment to pick one client record for project
-     */
-    public enum ProjectListShowOrPick {SHOW, PICK}
-    private ProjectListShowOrPick mode;
-
+    // == constants ==
     private static final String MODE_SHOW_OR_PICK = "modeShowOrPick";
 
+    // == fields ==
+    private ProjectListShowOrPick mode;
     private String callingClassName;
-        SimpleCursorAdapter cursorAdapter;
-
+    private SimpleCursorAdapter cursorAdapter;
     private OnFragmentInteractionListener mListener;
 
+    // == constructors and newInstance() ==
     public ProjectsListFragment() {
-        // Required empty public constructor
     }
 
     /**
@@ -67,6 +62,8 @@ public class ProjectsListFragment extends ListFragment
         return fragment;
     }
 
+    // == callback methods ==
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,25 +71,23 @@ public class ProjectsListFragment extends ListFragment
         Bundle args = getArguments();
         if (args != null) {
             mode = (ProjectsListFragment.ProjectListShowOrPick) args.getSerializable(MODE_SHOW_OR_PICK);
-            if(mode == ProjectListShowOrPick.PICK){
+            if (mode == ProjectListShowOrPick.PICK) {
                 callingClassName = args.getString(MainActivity.CALLING_CLASS_NAME);
             }
         }
+        setupListView();
+        getLoaderManager().initLoader(0, null, this);
+    }
 
+    private void setupListView() {
         String[] fromColumns = {ProjectsContract.Columns.NAME};
-        int[] toViews = {android.R.id.text1}; // The TextView in simple_list_item_1
+        int[] toViews = {android.R.id.text1};
 
-        // Create an empty adapter we will use to display the loaded data.
-        // We pass null for the cursor, then update it in onLoadFinished()
         cursorAdapter = new SimpleCursorAdapter(getContext(),
                 android.R.layout.simple_list_item_1, null,
                 fromColumns, toViews, 0);
 
         setListAdapter(cursorAdapter);
-
-        // Prepare the loader. Either re-connect with an existing one,
-        // or start a new one.
-        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -118,18 +113,17 @@ public class ProjectsListFragment extends ListFragment
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Cursor cursor =(Cursor) adapterView.getItemAtPosition(i);
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(i);
                 String projectName = cursor.getString(cursor.getColumnIndex(ProjectsContract.Columns.NAME));
                 long projectId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.Columns._ID));
                 long clientId = cursor.getLong(cursor.getColumnIndex(ProjectsContract.Columns.CLIENT_ID));
                 String clientName = cursor.getString(cursor.getColumnIndex(ProjectsContract.FullInfoColumns.CLIENT_NAME));
 
-                if(mode == ProjectListShowOrPick.PICK){
-                    mListener.onProjectPicked(projectId, projectName,clientId, clientName, callingClassName);
+                if (mode == ProjectListShowOrPick.PICK) {
+                    mListener.onProjectPicked(projectId, projectName, clientId, clientName, callingClassName);
                 } else {
                     mListener.onProjectClicked(projectName);
                 }
-
             }
         });
     }
@@ -154,7 +148,7 @@ public class ProjectsListFragment extends ListFragment
     @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        String[] PROJECTION = new String[] {ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
+        String[] PROJECTION = new String[]{ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns._ID,
                 ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME,
                 ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.CLIENT_ID + " AS " + ProjectsContract.FullInfoColumns.CLIENT_ID,
                 ClientsContract.TABLE_NAME + "." + ClientsContract.Columns.NAME + " AS " + ProjectsContract.FullInfoColumns.CLIENT_NAME};
@@ -164,7 +158,8 @@ public class ProjectsListFragment extends ListFragment
                 ProjectsContract.TABLE_NAME + "." + ProjectsContract.Columns.NAME + " != '' ))";
 
         return new CursorLoader(getContext(), ProjectsContract.CONTENT_URI,
-                PROJECTION, SELECTION, null, null);    }
+                PROJECTION, SELECTION, null, null);
+    }
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
@@ -176,6 +171,8 @@ public class ProjectsListFragment extends ListFragment
         cursorAdapter.swapCursor(null);
     }
 
+
+    // == interface ==
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -185,21 +182,33 @@ public class ProjectsListFragment extends ListFragment
     public interface OnFragmentInteractionListener {
         /**
          * method called when project is clicked in ProjectsListShowOrPick.SHOW mode
+         *
          * @param name name of the picked project
          */
         void onProjectClicked(String name);
+
         /**
          * method called when project is clicked in ProjectsListShowOrPick.PICK mode
-         * @param projectId id of the picked project
+         *
+         * @param projectId   id of the picked project
          * @param projectName name of the picked project
-         * @param clientId id of client related to picked project
-         * @param clientName name of client related to picked project
+         * @param clientId    id of client related to picked project
+         * @param clientName  name of client related to picked project
          */
-        void onProjectPicked(long projectId, String projectName,long clientId, String clientName, String callingClassName);
+        void onProjectPicked(long projectId, String projectName, long clientId, String clientName, String callingClassName);
 
         /**
          * method called after new project button is clicked
          */
         void onNewProjectClicked();
+    }
+
+    // == enum ==
+    /**
+     * use SHOW value when open this fragment to display and/or edit client records
+     * use PICK value when open this fragment to pick one client record for project
+     */
+    public enum ProjectListShowOrPick {
+        SHOW, PICK
     }
 }

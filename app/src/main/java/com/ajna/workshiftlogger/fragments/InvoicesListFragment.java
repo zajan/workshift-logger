@@ -1,6 +1,7 @@
 package com.ajna.workshiftlogger.fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,7 +17,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,17 +40,19 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class InvoicesListFragment extends Fragment {
+    // == constants ==
     private static final String TAG = "InvoicesListFragment";
-    final private int REQUEST_CODE_ASK_PERMISSIONS = 111;
+    private static final int REQUEST_CODE_ASK_PERMISSIONS = 111;
 
-    File[] files;
-    List<String> fileNames = new ArrayList<>();
-    ListView lvFiles;
-    ArrayAdapter<String> arrayAdapter;
-
-
+    // == fields ==
+    private File[] files;
+    private List<String> fileNames = new ArrayList<>();
+    private ListView lvFiles;
+    private ArrayAdapter<String> arrayAdapter;
     private OnFragmentInteractionListener mListener;
 
+
+    // == constructors and newInstance() ==
     public InvoicesListFragment() {
         // Required empty public constructor
     }
@@ -65,29 +67,31 @@ public class InvoicesListFragment extends Fragment {
         return new InvoicesListFragment();
     }
 
+
+    // == callback methods ==
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Context context = getContext();
+        if(context == null) return;
         arrayAdapter = new ArrayAdapter<>(
-                getContext(),
+                context,
                 android.R.layout.simple_list_item_1,
                 fileNames);
-
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_invoices_list, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         lvFiles = view.findViewById(R.id.lv_invoices);
         lvFiles.setAdapter(arrayAdapter);
 
@@ -122,7 +126,9 @@ public class InvoicesListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        int hasWriteStoragePermission = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        Activity activity = getActivity();
+        if(activity == null) return;
+        int hasWriteStoragePermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (hasWriteStoragePermission != PackageManager.PERMISSION_GRANTED) {
             requestPermission();
@@ -138,42 +144,6 @@ public class InvoicesListFragment extends Fragment {
         mListener = null;
     }
 
-    private void listFiles() {
-        String path = Environment.getExternalStorageDirectory().toString() + "/" + getString(R.string.folder_name);
-        Log.d(TAG, "listFiles: path = " + path);
-        File directory = new File(path);
-        files = directory.listFiles();
-        fileNames.clear();
-        if (files != null) {
-            for (File file : files) {
-                Log.d(TAG, "listFiles: name: " + file.getName());
-                fileNames.add(file.getName());
-            }
-        } else {
-            Log.d(TAG, "listFiles: files == null");
-        }
-    }
-
-    private void requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!shouldShowRequestPermissionRationale(Manifest.permission.WRITE_CONTACTS)) {
-
-                new AlertDialog.Builder(getContext())
-                        .setMessage("To create invoices you need to allow storage access")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                        REQUEST_CODE_ASK_PERMISSIONS);
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create()
-                        .show();
-            }
-
-        }
-    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -192,11 +162,49 @@ public class InvoicesListFragment extends Fragment {
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
+
+    // == private methods ==
+    private void listFiles() {
+        String path = Environment.getExternalStorageDirectory().toString() + "/" + getString(R.string.folder_name);
+        File directory = new File(path);
+        files = directory.listFiles();
+        fileNames.clear();
+        if (files != null) {
+            for (File file : files) {
+                fileNames.add(file.getName());
+            }
+        }
+    }
+
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!shouldShowRequestPermissionRationale(Manifest.permission.WRITE_CONTACTS)) {
+
+                Context context = getContext();
+                if(context == null) return;
+                new AlertDialog.Builder(context)
+                        .setMessage(R.string.allow_storage_message)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                        REQUEST_CODE_ASK_PERMISSIONS);
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null)
+                        .create()
+                        .show();
+            }
+        }
+    }
+
     private void previewPdf(String fileName) {
 
         String path = Environment.getExternalStorageDirectory() + "/" + getString(R.string.folder_name) + "/" + fileName;
         File file = new File(path);
-        Uri uri = FileProvider.getUriForFile(getContext(), getString(R.string.file_provider_authority), file);
+        Context context = getContext();
+        if(context == null) return;
+        Uri uri = FileProvider.getUriForFile(context, getString(R.string.file_provider_authority), file);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
@@ -213,6 +221,8 @@ public class InvoicesListFragment extends Fragment {
             startActivity(intent);
         }
     }
+
+    // == interface ==
 
     /**
      * This interface must be implemented by activities that contain this

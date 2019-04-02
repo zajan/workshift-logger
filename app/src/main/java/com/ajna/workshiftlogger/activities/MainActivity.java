@@ -31,55 +31,38 @@ import com.ajna.workshiftlogger.model.Shift;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         ClientsListFragment.OnFragmentInteractionListener, NewClientFragment.OnFragmentInteractionListener,
         ActiveShiftFragment.OnFragmentInteractionListener, ProjectsListFragment.OnFragmentInteractionListener,
-        NewProjectFragment.OnFragmentInteractionListener, ShiftsFragment.OnFragmentInteractionListener,
+        NewProjectFragment.OnFragmentInteractionListener,
         ShiftsListFragment.OnFragmentInteractionListener, ShiftDetailsFragment.OnFragmentInteractionListener,
-        InvoicesListFragment.OnFragmentInteractionListener, NewInvoiceFragment.OnFragmentInteractionListener{
+        InvoicesListFragment.OnFragmentInteractionListener, NewInvoiceFragment.OnFragmentInteractionListener {
+
+    // == constants ==
     private static final String TAG = "MainActivity";
     public static final String CALLING_CLASS_NAME = "CallingClassName";
 
+    // == fields ==
     private ActionBarDrawerToggle toggle;
     private DrawerLayout drawer;
     private ActionBar actionBar;
     private boolean mToolBarNavigationListenerIsRegistered = false;
 
+    // == callback methods ==
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: starts");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        actionBar = getSupportActionBar();
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.setDrawerIndicatorEnabled(true);
-
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        if (savedInstanceState != null) {
-            resolveUpButtonWithFragmentStack();
-        } else {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_main, ShiftsFragment.newInstance(), ShiftsFragment.class.getSimpleName())
-                    .commit();
-            navigationView.setCheckedItem(R.id.nav_shifts);
-        }
+        setupSupportActionBar();
+        setupDrawer();
+        setupNavigationView(savedInstanceState);
     }
 
     @Override
     public void onBackPressed() {
-        Log.d(TAG, "onBackPressed: starts");
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
-            Log.d(TAG, "onBackPressed: backstack amount = " + backStackAmount);
 
             if (backStackAmount >= 1) {
                 getSupportFragmentManager().popBackStack();
@@ -134,49 +117,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void resolveUpButtonWithFragmentStack() {
-        showUpButton(getSupportFragmentManager().getBackStackEntryCount() > 0);
-    }
 
-    private void showUpButton(boolean show) {
-        Log.d(TAG, "showUpButton: starts");
-        Log.d(TAG, "showUpButton: show = " + show);
-        if (show) {
-            toggle.setDrawerIndicatorEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            if (!mToolBarNavigationListenerIsRegistered) {
-                Log.d(TAG, "showUpButton: !mToolBarNavigationListenerIsRegistered");
-                toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        onBackPressed();
-                    }
-                });
-                mToolBarNavigationListenerIsRegistered = true;
-            }
-        } else {
-            Log.d(TAG, "showUpButton: mToolBarNavigationListenerIsRegistered");
-
-            actionBar.setDisplayHomeAsUpEnabled(false);
-            toggle.setDrawerIndicatorEnabled(true);
-            toggle.setToolbarNavigationClickListener(null);
-            mToolBarNavigationListenerIsRegistered = false;
-
-        }
-    }
-    private void popFragmentBackStack(){
-        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
-
-        if (backStackAmount >= 1) {
-            getSupportFragmentManager().popBackStack();
-            if (backStackAmount == 1) {
-                showUpButton(false);
-            }
-        } else {
-            super.onBackPressed();
-        }
-    }
-
+    // == override methods ==
     @Override
     public void onClientClicked(String name) {
         Log.d(TAG, "onNewClientClicked: starts");
@@ -210,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onSaveClientClicked() {
         popFragmentBackStack();
     }
+
     @Override
     public void onSelectClientClicked() {
         getSupportFragmentManager().beginTransaction()
@@ -246,9 +189,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragment.updateCurrentProject(projectName, projectId, clientName);
             }
         }
-        if(callingClassName.equals(NewInvoiceFragment.class.getSimpleName())){
+        if (callingClassName.equals(NewInvoiceFragment.class.getSimpleName())) {
             NewInvoiceFragment fragment = (NewInvoiceFragment) fragmentManager.findFragmentByTag(NewInvoiceFragment.class.getSimpleName());
-            if(fragment != null) {
+            if (fragment != null) {
                 fragment.updateCurrentProject(projectName, projectId, clientId, clientName);
             }
         }
@@ -302,5 +245,77 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .replace(R.id.fragment_main, NewInvoiceFragment.newInstance(), NewInvoiceFragment.class.getSimpleName())
                 .addToBackStack(null)
                 .commit();
+    }
+
+    // == private methods ==
+
+    private void setupSupportActionBar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        actionBar = getSupportActionBar();
+    }
+
+    private void setupDrawer() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.setDrawerIndicatorEnabled(true);
+
+        toggle.syncState();
+    }
+
+    private void setupNavigationView(Bundle savedInstanceState) {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        if (savedInstanceState != null) {
+            resolveUpButtonWithFragmentStack();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_main, ShiftsFragment.newInstance(), ShiftsFragment.class.getSimpleName())
+                    .commit();
+            navigationView.setCheckedItem(R.id.nav_shifts);
+        }
+    }
+
+    private void resolveUpButtonWithFragmentStack() {
+        showUpButton(getSupportFragmentManager().getBackStackEntryCount() > 0);
+    }
+
+    private void showUpButton(boolean show) {
+        if (show) {
+            toggle.setDrawerIndicatorEnabled(false);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            if (!mToolBarNavigationListenerIsRegistered) {
+                toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onBackPressed();
+                    }
+                });
+                mToolBarNavigationListenerIsRegistered = true;
+            }
+        } else {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            toggle.setDrawerIndicatorEnabled(true);
+            toggle.setToolbarNavigationClickListener(null);
+            mToolBarNavigationListenerIsRegistered = false;
+        }
+    }
+
+    private void popFragmentBackStack() {
+        int backStackAmount = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (backStackAmount >= 1) {
+            getSupportFragmentManager().popBackStack();
+            if (backStackAmount == 1) {
+                showUpButton(false);
+            }
+        } else {
+            super.onBackPressed();
+        }
     }
 }
